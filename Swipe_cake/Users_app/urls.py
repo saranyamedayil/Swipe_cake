@@ -16,8 +16,13 @@ urlpatterns = [
     path('products/category/<str:category_name>/', ProductCategoryView.as_view(), name='product_category'),
     path('add_to_cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('view_cart/', views.view_cart, name='view_cart'),
+    path('delete_from_cart/<int:item_id>/', views.delete_from_cart, name='delete_from_cart'),
+    path('Users_wishlist/<int:product_id>/',views.Users_wishlist,name='Users_wishlist'),
+    path('View_userswishlist',views.View_userswishlist,name='View_userswishlist'),
+    path('delete_from_wishlist/<int:item_id>/', views.delete_from_wishlist, name='delete_from_wishlist'),
     path('about',views.about,name='about'),
     path('contact',views.contact,name='contact'),
+    path('calculate_cart_total',views.calculate_cart_total),    
 
 
     # path('addtocart',views.addtocart,name='addtocart'),

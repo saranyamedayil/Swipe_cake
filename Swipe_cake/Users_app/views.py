@@ -611,6 +611,40 @@ def view_cart(request):
         return redirect('login')  # Redirect to your login page name
 
 
+def delete_from_cart(request, item_id):
+    username = request.session.get('username')
+    if username:
+        # Get the user object associated with the username
+        user = Custom_users.objects.get(username=username)
+
+        
+    # Get the cart item to delete
+        cart_item = get_object_or_404(CartItem, id=item_id, user=user)
+
+    # Delete the cart item
+        cart_item.delete()
+
+    # Redirect back to the cart page or any other desired page
+    return redirect(view_cart)
+
+
+
+
+
+#............................................about page ...................................
+
+def calculate_cart_total(user):
+    cart_items = CartItem.objects.filter(user=user)
+    total = Decimal(0)
+
+    for item in cart_items:
+        # Calculate the total price for each cart item
+        item_total = item.quantity * item.product.product_price
+        total += item_total
+
+    return total
+
+
 def about(request):
     username = request.session.get('username')
     total = Decimal(0)  # Default total for unauthenticated users
@@ -618,24 +652,7 @@ def about(request):
     if username:
         # Get the user object associated with the username
         user = Custom_users.objects.get(username=username)
-
-        cart_items = CartItem.objects.filter(user=user)
-
-        subtotal_dict = {}
-        total = Decimal(0)
-
-        for item in cart_items:
-            # Calculate the total price for each cart item
-            item_total = item.quantity * item.product.product_price
-            if item.product.product_category.category_name in subtotal_dict:
-                # If it exists, add the item total to the existing subtotal
-                subtotal_dict[item.product.product_category.category_name] += item_total
-            else:
-                # If it doesn't exist, create a new entry
-                subtotal_dict[item.product.product_category.category_name] = item_total
-
-            # Add item total to the total
-            total += item_total
+        total = calculate_cart_total(user)
 
     return render(request, 'about.html', {'cart_total': total})
 
@@ -647,26 +664,85 @@ def contact(request):
     if username:
         # Get the user object associated with the username
         user = Custom_users.objects.get(username=username)
-
-        cart_items = CartItem.objects.filter(user=user)
-
-        subtotal_dict = {}
-        total = Decimal(0)
-
-        for item in cart_items:
-            # Calculate the total price for each cart item
-            item_total = item.quantity * item.product.product_price
-            if item.product.product_category.category_name in subtotal_dict:
-                # If it exists, add the item total to the existing subtotal
-                subtotal_dict[item.product.product_category.category_name] += item_total
-            else:
-                # If it doesn't exist, create a new entry
-                subtotal_dict[item.product.product_category.category_name] = item_total
-
-            # Add item total to the total
-            total += item_total
+        total = calculate_cart_total(user)
 
     return render(request,'contact.html',{'cart_total': total})
+
+
+def Users_wishlist(request,product_id): 
+    username = request.session.get('username')
+  
+    if username:
+        # Get the user object associated with the username
+        user = Custom_users.objects.get(username=username)
+        product = get_object_or_404(Product_Details, product_id=product_id)
+       
+
+
+    # Check if the user already has this product in their cart
+        existing_wishlist_item = CartItem.objects.filter(user=user, product=product).exists()
+
+        if existing_wishlist_item:
+            messages.warning(request, 'Product is already in your wishlist')
+
+        else:
+            new_wishlist_item = CartItem(user=user, product=product,quantity=1)
+            new_wishlist_item.save()
+            messages.success(request, 'Product added to your wishlist')
+    else:
+        messages.warning(request, 'Please log in to add products to your wishlist')
+
+    return redirect(Users_homeafter)
+
+
+
+def View_userswishlist(request):
+    username = request.session.get('username')
+    total = Decimal(0)  # Default total for unauthenticated users
+
+   
+
+    if username:
+        user=Custom_users.objects.get(username=username)
+        total = calculate_cart_total(user)
+
+        wishlist_items=CartItem.objects.filter(user=user)
+
+    else:
+        messages.warning(request, 'please login your account')
+        return redirect(Users_login)
+    
+
+    return render(request,'User_wishlist.html',{'wishlist':wishlist_items,'cart_total': total})
+
+
+def delete_from_wishlist(request, item_id):
+    username = request.session.get('username')
+    if username:
+        # Get the user object associated with the username
+        user = Custom_users.objects.get(username=username)
+
+        
+    # Get the cart item to delete
+        wishlist_item = get_object_or_404(CartItem, id=item_id, user=user)
+
+    # Delete the cart item
+        wishlist_item.delete()
+
+    # Redirect back to the wishlist page 
+    return redirect(View_userswishlist)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
