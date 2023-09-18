@@ -1,0 +1,56 @@
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|profile {% endblock %}
+{% block content %}
+
+
+
+
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          
+          <div class="row">
+            <div class="col-xl-12 col-sm-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-9">
+                      {% comment %} <div class="d-flex align-items-center align-self-start">
+                        <h3 class="mb-0">$12.34</h3>
+                        <p class="text-success ml-2 mb-0 font-weight-medium">+3.5%</p>
+                      </div> {% endcomment %}
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th scope="col">Id</th>
+                              
+                              <th scope="col">username</th>
+                              <th scope="col">Email</th>
+                              <th scope="col">phonenumber</th>
+                             
+                             
+                              <th scope="col">status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for s in superusers %}
+                              <tr>
+                                <td>{{ forloop.counter}}</td>
+                    
+                                <td>{{ s.username }}</td>
+                                <td>{{ s.email }}</td>
+                                <td>{{ s.phonenumber }}</td>
+                                <td class='btn btn-success create-new-button'>active</td>
+                                
+                    </div>
+                    {% endfor %}
+ 
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  {% endblock content %}

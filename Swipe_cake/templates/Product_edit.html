@@ -1,0 +1,81 @@
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|product|add {% endblock %}
+{% block content %}
+
+
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> EDIT PRODUCTS </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  {% comment %} <li class="breadcrumb-item"><a class='text-decoration-none' href="{% url 'productadd' %}">ADD</a></li>
+                  <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'Productupdate'product_id %}" class='text-decoration-none'>EDIT</a></li> {% endcomment %}
+                </ol>
+              </nav>
+            </div>
+            
+              <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">PRODUCTS</h4>
+                    <p class="card-description"> EDIT products here.. </p>
+                    <form class="forms-sample" method="POST" enctype="multipart/form-data" action="{% url 'do_update' product_id=pd_up.product_id %}">
+                      {% csrf_token %}
+                      <div class="form-group row">
+                        <label for="exampleInputUsername2" class="col-sm-3 col-form-label" >Product Name</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputUsername2" placeholder="Product Name" name='productname' value="{{pd_up.product_name}}">
+                        </div>
+                      </div>
+                     <div class="form-group row">
+                        <label for="exampleInputEmail2" class="col-sm-3 col-form-label">Category</label>
+                        <div class="col-sm-9">
+                          
+                          <select class="form-control" id="category" name="category">
+                            <option value="">Select a category</option>
+                            {% for category in categories %}
+                           
+                            <option value="{{ category.category_id }}" {% if category.category_id == pd_up.product_category_id %}selected{% endif %}>{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                        </div>
+                      </div> 
+                      
+                      <div class="form-group row">
+                        <label for="exampleInputMobile" class="col-sm-3 col-form-label">stock</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputMobile" placeholder="stock" name='stock' value="{{pd_up.product_stock}}">
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="text" class="col-sm-3 col-form-label">price</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputPassword2" placeholder="price" name='price' value="{{pd_up.product_price}}">
+                        </div>
+                      </div>
+                      
+                      
+                      <div class="form-group row">
+                        <label for="text" class="col-sm-3 col-form-label">Image</label>
+                        <div class="col-sm-9">
+                            <!-- Display the current image -->
+                            <img src="{{ pd_up.product_image.url }}" alt="Current Image" class="img-thumbnail">
+                            
+                            <!-- Allow the user to change the image -->
+                            <input type="file" class="form-control-file mt-2" id="exampleInputImage" name="image">
+                            <small class="form-text text-muted">Select a new image file to update.</small>
+                        </div>
+                    </div>
+                      
+                      <button type="submit" class="btn btn-primary mr-2">UPDATE</button>
+                      <button class="btn btn-dark">Cancel</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+             
+          
+{% endblock content %}

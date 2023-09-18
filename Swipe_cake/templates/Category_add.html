@@ -1,0 +1,49 @@
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|product|add {% endblock %}
+{% block content %}
+
+
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> ADD PRODUCTS </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  
+                </ol>
+              </nav>
+            </div>
+            
+              <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">PRODUCT CATEGORY</h4>
+                    <p class="card-description"> ADD new category here.. </p>
+                    <form class="forms-sample" method="POST" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <div class="form-group row">
+                        <label for="exampleInputUsername2" class="col-sm-3 col-form-label" >Category Name</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputUsername2" placeholder="Category Name" name='categoryname'>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="exampleInputEmail2" class="col-sm-3 col-form-label">Quantity</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputEmail2" placeholder="Quantity" name='quantity' >
+                        </div>
+                      </div>
+                      
+                      </div>
+                      
+                      <button type="submit" class="btn btn-primary mr-2">ADD</button>
+                      <button class="btn btn-dark">Cancel</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+             
+          
+{% endblock content %}

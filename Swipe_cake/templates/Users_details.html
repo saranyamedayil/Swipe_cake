@@ -1,0 +1,149 @@
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|home {% endblock %}
+{% block content %}
+
+
+
+
+
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          
+          <div class="row">
+            <div class="col-xl-12 col-sm-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-9">
+                      {% comment %} <div class="d-flex align-items-center align-self-start">
+                        <h3 class="mb-0">$12.34</h3>
+                        <p class="text-success ml-2 mb-0 font-weight-medium">+3.5%</p>
+                      </div> {% endcomment %}
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th scope="col">Id</th>
+                              
+                              <th scope="col">username</th>
+                              
+                              <th scope="col">phonenumber</th>
+                              <th scope="col">Block/unblock</th>
+                              <th scope="col">Superuser</th>
+                              <th scope="col">Staff</th>
+                              
+                           
+                           
+                             
+                             
+                            
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for s in users %}
+                              <tr>
+                                <td>{{ forloop.counter}}</td>
+                    
+                                <td>{{ s.username }}</td>
+                               
+                                <td>{{ s.phonenumber }}</td>
+                                {% comment %} <td class='btn btn-danger create-new-button'>block</td>
+                                <td class='btn btn-success create-new-button'>unblock</td> {% endcomment %}
+                                {% comment %} <td>
+                                    <button class="btn btn-warning toggle-button" data-userid="{{ s.id }}" data-attribute="is_superuser">
+                                        {% if s.is_superuser %}Unset Superuser{% else %}Set Superuser{% endif %}
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary toggle-button" data-userid="{{ s.id }}" data-attribute="is_staff">
+                                        {% if s.is_staff %}Unset Staff{% else %}Set Staff{% endif %}
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger toggle-button" data-userid="{{ s.id }}" data-attribute="is_blocked">
+                                        {% if s.is_blocked %}Unblock{% else %}Block{% endif %}
+                                    </button>
+                                </td> {% endcomment %}
+                                <td>
+                                    <button class="btn btn-danger toggle-button"
+                                            data-userid="{{ s.id }}"
+                                            data-attribute="is_blocked">
+                                        {% if s.is_blocked %}Unblocked{% else %}Block{% endif %}
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-success toggle-button"
+                                            data-userid="{{ s.id }}"
+                                            data-attribute="is_superuser">
+                                        {% if s.is_superuser %}False{% else %}True{% endif %}
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-warning toggle-button"
+                                            data-userid="{{ s.id }}"
+                                            data-attribute="is_staff">
+                                        {% if s.is_staff %}False{% else %}True{% endif %}
+                                    </button>
+                                </td>
+                                
+                    </div>
+                    {% endfor %}
+                </tbody>
+ 
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <script>
+    {% block script %}
+        document.querySelectorAll('.toggle-button').forEach(button => {
+            button.addEventListener('click', function () {
+                var userId = $(this).data('userid');
+                var attribute = $(this).data('attribute');
+                var url = `/toggle_user_attribute/${userId}/${attribute}/`;
+    
+                // Send an AJAX POST request to the Django view
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Network response was not ok');
+                    }
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Update the button text and style based on the response
+                        if (data.new_value) {
+                            this.textContent = `Unset ${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`;
+                            this.classList.remove('btn-success');
+                            this.classList.add('btn-danger');
+                        } else {
+                            this.textContent = `Set ${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`;
+                            this.classList.remove('btn-danger');
+                            this.classList.add('btn-success');
+                        }
+                    } else {
+                        console.error('Error updating user attribute:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    {% endblock script %}
+    </script>
+    
+
+  {% endblock content %}

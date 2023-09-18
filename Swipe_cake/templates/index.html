@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="zxx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Cake Template">
+    <meta name="keywords" content="Cake, unica, creative, html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Swipe_cake|Chocolates {% endblock %}</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+    <!-- Css Styles -->
+    <link rel="stylesheet" href="{% static '/css/bootstrap.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/flaticon.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/barfiller.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/magnific-popup.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/font-awesome.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/elegant-icons.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/nice-select.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/owl.carousel.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/slicknav.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static '/css/style.css' %}" type="text/css">
+
+
+    <style>
+        .height-100{height:100vh}.card{width:400px;border:none;height:300px;box-shadow: 0px 5px 20px 0px #d2dae3;z-index:1;display:flex;justify-content:center;align-items:center}.card h6{color:red;font-size:20px}.inputs input{width:40px;height:40px}input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button{-webkit-appearance: none;-moz-appearance: none;appearance: none;margin: 0}.card-2{background-color:#fff;padding:10px;width:350px;height:100px;bottom:-50px;left:20px;position:absolute;border-radius:5px}.card-2 .content{margin-top:50px}.card-2 .content a{color:red}.form-control:focus{box-shadow:none;border:2px solid red}.validate{border-radius:20px;height:40px;background-color:red;border:1px solid red;width:140px}
+    </style>
+</head>
+
+<body>
+    
+    {% block content %}
+   
+    
+    
+
+
+{% endblock content %}
+<!-- Js Plugins -->
+<script src="{% static '/js/jquery-3.3.1.min.js' %}"></script>
+<script src="{% static '/js/bootstrap.min.js' %}"></script>
+<script src="{% static '/js/jquery.nice-select.min.js' %}"></script>
+<script src="{% static '/js/jquery.barfiller.js' %}"></script>
+<script src="{% static '/js/jquery.magnific-popup.min.js' %}"></script>
+<script src="{% static '/js/jquery.slicknav.js' %}"></script>
+<script src="{% static '/js/owl.carousel.min.js' %}"></script>
+<script src="{% static '/js/jquery.nicescroll.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        function OTPInput() {
+            const inputs = document.querySelectorAll('#otp > *[id]');
+            for (let i = 0; i < inputs.length; i++) {
+                inputs[i].addEventListener('keydown', function(event) {
+                    if (event.key === "Backspace") {
+                        inputs[i].value = '';
+                        if (i !== 0) inputs[i - 1].focus();
+                    } else {
+                        if (i === inputs.length - 1 && inputs[i].value !== '') {
+                            return true;
+                        } else if (event.keyCode >= 48 && event.keyCode <= 57) {
+                            inputs[i].value = event.key;
+                            if (i !== inputs.length - 1) inputs[i + 1].focus();
+                            event.preventDefault();
+                        } else if (event.keyCode >= 65 && event.keyCode <= 90) {
+                            inputs[i].value = String.fromCharCode(event.keyCode);
+                            if (i !== inputs.length - 1) inputs[i + 1].focus();
+                            event.preventDefault();
+                        }
+                    }
+                });
+            }
+        }
+        OTPInput();
+    });
+
+
+
+
+    
+   
+      
+   
+</script>
+
+
+
+</body>
+
+</html>

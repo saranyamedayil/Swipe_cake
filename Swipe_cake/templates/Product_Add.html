@@ -1,0 +1,140 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+{% block title %}Admin | Product | Add {% endblock %}
+{% block content %}
+
+
+{% comment %} {% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|product|add {% endblock %}
+{% block content %}
+
+
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> ADD PRODUCTS </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  
+                </ol>
+              </nav>
+            </div>
+            
+              <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">PRODUCTS</h4>
+                    <p class="card-description"> ADD new products here.. </p>
+                    <form class="forms-sample" method="POST" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <div class="form-group row">
+                        <label for="exampleInputUsername2" class="col-sm-3 col-form-label" >Product Name</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputUsername2" placeholder="Product Name" name='productname'>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="exampleInputEmail2" class="col-sm-3 col-form-label">Category</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputEmail2" placeholder="category" name='category' >
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="exampleInputMobile" class="col-sm-3 col-form-label">stock</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputMobile" placeholder="stock" name='stock'>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="text" class="col-sm-3 col-form-label">price</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="exampleInputPassword2" placeholder="price" name='price'>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group row">
+                        <label for="text" class="col-sm-3 col-form-label">image</label>
+                        <div class="col-sm-9">
+                          <input type="file" class="form-control-file" id="exampleInputImage" name="image">
+
+                          <!-- Display the selected file name -->
+                          <small class="form-text text-muted">Select an image file to upload.</small>
+                      </div>
+                      </div>
+                      
+                      <button type="submit" class="btn btn-primary mr-2">ADD</button>
+                      <button class="btn btn-dark">Cancel</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+             
+          
+{% endblock content %} {% endcomment %}
+
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="page-header">
+            <h3 class="page-title">Add PRODUCTS</h3>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <!-- Add breadcrumbs if needed -->
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-6 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">PRODUCTS</h4>
+                    <p class="card-description">Add new products here..</p>
+                    <form class="forms-sample" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <label for="productname" class="col-sm-3 col-form-label">Product Name</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="productname" placeholder="Product Name"
+                                    name="productname">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="category" class="col-sm-3 col-form-label">Category</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="category" name="category">
+                                    <option value="">Select a category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.category_id }}">{{ category.category_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="stock" class="col-sm-3 col-form-label">Stock</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="stock" placeholder="Stock" name="stock">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="price" class="col-sm-3 col-form-label">Price</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="price" placeholder="Price" name="price">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="image" class="col-sm-3 col-form-label">Image</label>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control-file" id="image" name="image">
+                                <!-- Display the selected file name -->
+                                <small class="form-text text-muted">Select an image file to upload.</small>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mr-2">Add</button>
+                        <a href="" class="btn btn-dark">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
