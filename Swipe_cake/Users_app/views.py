@@ -11,13 +11,15 @@ from django.http import JsonResponse
 import random
 from django.views.generic import ListView
 from decimal import Decimal
+from django.db.models import Q
 
 
 
 # Create your views here.
-
 def Users_homebefore(request):
-    return render(request,'home_before.html')
+    message = 'please login your account'
+    return render(request, 'home_before.html', {'msg': message})
+
 
 
 @never_cache 
@@ -88,42 +90,29 @@ def sent_otp(request):
             elif Custom_users.objects.filter(phonenumber=phonenumber).exists():
                 messages.error(request, "Phone number already used")
             else:
-                user = Custom_users(username=username, phonenumber=phonenumber, password=password)
-                user.save()
+                try:
+                    user = Custom_users(username=username, phonenumber=phonenumber, password=password)
+                    user.save()
+                    # Generate and send OTP only if the form is valid
+                    otp = random.randint(100000, 999999)
+                    otp_to_ph = str(otp)
+                    print(".............................", otp_to_ph)
+                    user.password = password
+                    user.save()
 
-        if not phonenumber:
-            return render(request, 'Usersignin.html')
+                    # Save user information in the session
+                    request.session['phonenumber'] = phonenumber
+                    request.session['otp'] = otp_to_ph
+                    request.session['username'] = username
 
-        try:
-            # Create or retrieve the user based on the phone number
-            user, created = Custom_users.objects.get_or_create(phonenumber=phonenumber)
+                    # Send OTP via SMS or other methods here if needed
 
-            if username:
-                user.username = username
+                    messages.success(request, 'OTP sent')
+                    ph = {'phone': phonenumber}
+                    return render(request, 'enter_otp.html', ph)
+                except Exception as e:
+                    messages.error(request, str(e))
 
-            otp = random.randint(100000, 999999)
-            otp_to_ph = str(otp)
-            print(".............................",otp_to_ph)
-            
-            if password:
-                user.password = password
-            user.save()
-
-        except Custom_users.DoesNotExist:
-            user = Custom_users(phonenumber=phonenumber)
-            user.save()
-
-        # Save user information in the session
-        request.session['phonenumber'] = phonenumber
-        request.session['otp'] = otp_to_ph
-        request.session['username'] = username
-        
-        # Send OTP via SMS or other methods here if needed
-        
-        messages.success(request, 'OTP sent')
-        ph = {'phone': phonenumber}
-        return render(request, 'enter_otp.html', ph)
-    
     return redirect(verify_otp)
 
 
@@ -203,6 +192,10 @@ def Users_homeafter(request):
 
     product = Product_Details.objects.all()
     context['product'] = product
+
+     # Retrieve all categories
+    categories = Product_Category.objects.all()
+    context['categories'] = categories  # Add 'categories' to the context
 
     if 'username' in request.session:
         username = request.session.get('username')
@@ -334,6 +327,22 @@ def toggle_user_attribute(request, user_id, attribute):
     else:
         return JsonResponse({'success': False, 'error': 'Attribute not found'})
     
+def User_search(request):
+    if 'q' in request.GET:
+        q=request.GET['q']
+        multiple_s=Q(Q(username__icontains=q)|Q(phonenumber__icontains=q))
+        users=Custom_users.objects.filter(multiple_s)
+    
+    else:
+        users=Custom_users.objects.all()
+
+    user={
+        'users':users
+    }
+    return render(request,"Users_details.html",user)
+
+
+    
 
     
 
@@ -464,6 +473,27 @@ def Product_delete(request,product_id):
   return HttpResponseRedirect(reverse(Product_Details_all))
 
 
+def Product_search(request):
+    if 'q' in request.GET:
+        q=request.GET['q']
+        multiple_q=Q(Q(product_name__icontains=q) |Q(product_category__category_name__icontains=q)|   #to search multiple data's import 'Q'
+                    Q(product_id__icontains=q))
+        
+        products=Product_Details.objects.filter(multiple_q)
+
+    else:
+
+        Product_Details.objects.all()
+
+    product={
+        'product':products
+    }
+
+    return render(request,'Product_details.html',product)
+
+
+
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>product category based codes>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -547,13 +577,24 @@ class ProductCategoryView(ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['category_name'] = self.kwargs['category_name']
+        category_name = self.kwargs['category_name']
+
+        # Calculate cart total using the calculate_cart_total function
+        if 'username' in self.request.session:
+            username = self.request.session.get('username')
+
+            if username:
+                user = Custom_users.objects.get(username=username)
+                total = calculate_cart_total(user)
+                context['cart_total'] = total  # Add 'cart_total' to the context
+
+        context['category_name'] = category_name
         return context
 
 
 
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>> add to cart $ displaying >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>>>> add to cart $ displaying & deleting >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 def add_to_cart(request, product_id):
@@ -576,8 +617,16 @@ def add_to_cart(request, product_id):
         # Create a new cart item for the user
         new_cart_item = CartItem(user=user, product=product, quantity=1)
         new_cart_item.save()
+        messages.success(request, 'Product added to your cart')
+
+            # Remove the product from the wishlist
+        WishlistItem.objects.filter(user=user, product=product).delete()
+
     
     return redirect(Users_homeafter)  # Redirect to product list page
+
+
+
 
 def view_cart(request):
     # Retrieve the username from the session
@@ -631,7 +680,7 @@ def delete_from_cart(request, item_id):
 
 
 
-#............................................about page ...................................
+#............................................ calculating the cart total into seperate function ...................................
 
 def calculate_cart_total(user):
     cart_items = CartItem.objects.filter(user=user)
@@ -645,6 +694,8 @@ def calculate_cart_total(user):
     return total
 
 
+#???????????????????????????????????? about page ????????????????????????
+
 def about(request):
     username = request.session.get('username')
     total = Decimal(0)  # Default total for unauthenticated users
@@ -656,6 +707,9 @@ def about(request):
 
     return render(request, 'about.html', {'cart_total': total})
 
+
+
+########################### contact page ??????????????????????????????
 
 def contact(request):
     username = request.session.get('username')
@@ -669,6 +723,11 @@ def contact(request):
     return render(request,'contact.html',{'cart_total': total})
 
 
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< adding products into wishlist, view and removing  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
 def Users_wishlist(request,product_id): 
     username = request.session.get('username')
   
@@ -680,13 +739,13 @@ def Users_wishlist(request,product_id):
 
 
     # Check if the user already has this product in their cart
-        existing_wishlist_item = CartItem.objects.filter(user=user, product=product).exists()
+        existing_wishlist_item = WishlistItem.objects.filter(user=user, product=product).exists()
 
         if existing_wishlist_item:
             messages.warning(request, 'Product is already in your wishlist')
 
         else:
-            new_wishlist_item = CartItem(user=user, product=product,quantity=1)
+            new_wishlist_item = WishlistItem(user=user, product=product)
             new_wishlist_item.save()
             messages.success(request, 'Product added to your wishlist')
     else:
@@ -706,7 +765,7 @@ def View_userswishlist(request):
         user=Custom_users.objects.get(username=username)
         total = calculate_cart_total(user)
 
-        wishlist_items=CartItem.objects.filter(user=user)
+        wishlist_items=WishlistItem.objects.filter(user=user)
 
     else:
         messages.warning(request, 'please login your account')
@@ -724,13 +783,16 @@ def delete_from_wishlist(request, item_id):
 
         
     # Get the cart item to delete
-        wishlist_item = get_object_or_404(CartItem, id=item_id, user=user)
+        wishlist_item = get_object_or_404(WishlistItem, id=item_id, user=user)
 
     # Delete the cart item
         wishlist_item.delete()
 
     # Redirect back to the wishlist page 
     return redirect(View_userswishlist)
+
+
+
 
 
 

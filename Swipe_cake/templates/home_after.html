@@ -5,6 +5,9 @@
 {% block title %}Swipe_cake|Chocolates {% endblock %}
 {% block content %}
 
+
+
+
 <!-- Page Preloder -->
 <div id="preloder">
     <div class="loader"></div>
@@ -80,20 +83,47 @@
                         </div>
                         <div class="header__top__right">
                             <div class="header__top__right__links">
-                                <a href="#" class="search-switch"><img src="{% static '/img/icon/search.png' %}" alt=""></a>
+                                <a href="#" class="search-switch"> <img src="{% static '/img/icon/search.png' %}" alt=""></a>
                                 <a href="{% url 'View_userswishlist' %}"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
                             </div>
                             <div class="header__top__right__cart">
                                 <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>0</span></a>
                                 <div class="cart__price">Cart: <span>Rs.{{cart_total}}</span></div></div>
-                                <div class="header__top__right__cart">
-                                    <a href="#"><img src="{% static '/img/user-icon.png' %}" alt=""></a>
-                                    </div>
+                                <div class="header__top__right__cart" style="margin-left: 2vw">
+                                    {% comment %} <nav class="header__menu mobile-menu">
+                                    <ul>
+                                        <li>
+                                            <a href="#"><img src="{% static '/img/user-icon.png' %}" alt=""></a>
+                                            <ul class='dropdown'>
+                                                <li><a href="./shop-details.html">Shop Details</a></li>
+                                                <li><a href="{% url 'view_cart' %}">Shopping Cart</a></li>
+                                                <li><a href="./checkout.html">Check Out</a></li>
+                                                <li><a href="{% url 'View_userswishlist' %}">Wishlist</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul> {% endcomment %}
+                                    <!-- Example split danger button -->
+                                </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-white"><img src="{% static '/img/user-icon.png' %}" alt=""></button>
+                        <button type="button" class="btn btn-white dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                      
+                        <li><a class="dropdown-item" href="#">Separated link</a></li>
+                        </ul>
+                    </div>
+                    
+                                    
+                                    
+                                    
                                   
                                
-                                {% comment %} <div class="btn btn-success">logout</div> {% endcomment %}
-{% comment %} 
-                                <div><img src="{% static '/img/user-icon.png' %}" alt=""></div>      {% endcomment %}
+                                
                             </div>
                             
                         </div>
@@ -142,32 +172,36 @@
 <section class="hero">
     <div class="hero__slider owl-carousel">
         <div class="hero__item set-bg" data-setbg="{% static '/img/hero/hero-1.jpg' %}">
-           
+
+
+
+
             <div class="container">
-                  {% if messages %}
+         
+                  {% comment %} {% if messages %}
                     {% for message in messages %}
                         <div class="alert alert-success" role="alert">
                             {{ message }}
                         </div>
                     {% endfor %}
-                {% endif %}
+                {% endif %}  {% endcomment %}
                 <div class="row d-flex justify-content-center">
                   
                     <div class="col-lg-8">
                         <div class="hero__text">
-                            <h2>Making your life sweeter one bite at a time!</h2>
+                            <h2> Making your life sweeter one bite at a time!</h2>
                             <a href="#" class="primary-btn">Our cakes</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="hero__item set-bg" data-setbg="img/hero/hero-1.jpg">
+        <div class="hero__item set-bg" data-setbg="{% static 'img/hero/hero-1.jpg' %}">
             <div class="container">
                 <div class="row d-flex justify-content-center">
-                    <div class="col-lg-8">
+                    <div class="col-lg-12">
                         <div class="hero__text">
-                            <h2>Making your life sweeter one bite at a time!</h2>
+                            <h2>Explore our cake collection and let your taste buds dance with delight!</h2>
                             <a href="#" class="primary-btn">Our cakes</a>
                       
                         </div>
@@ -185,6 +219,7 @@
     <div class="container">
         <div class="row">
             <div class="categories__slider owl-carousel">
+
                 {% for category in categories %}
                 <div class="col-xl-3">
              
@@ -202,6 +237,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Categories Section End -->
 
@@ -468,7 +504,7 @@
         </div>
     </div>
     <div><h4>
-        <a href="" class='text text-decoration-none text-dark'>write a valuable feedback <span class='text text-primary'>here...</span> </a></h4>
+        <a href="" class='text text-decoration-none text-dark'>write your valuable feedback <span class='text text-primary'>here...</span> </a></h4>
     </div>
 </section>
 <!-- Testimonial Section End -->
@@ -566,8 +602,8 @@
                     <div class="footer__logo">
                         <a href="#"><img src="{% static '/img/footer-logo.png' %}" alt=""></a>
                     </div>
-                    <p>Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                    labore dolore magna aliqua.</p>
+                    <p>Join us in celebrating life's sweet moments with a slice of happiness. 
+                        Whether you're ordering online or visiting our charming bakery, we promise an unforgettable cake experience.</p>
                     <div class="footer__social">
                         <a href="#"><i class="fa fa-facebook"></i></a>
                         <a href="#"><i class="fa fa-twitter"></i></a>

@@ -17,10 +17,18 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-9">
-                      {% comment %} <div class="d-flex align-items-center align-self-start">
-                        <h3 class="mb-0">$12.34</h3>
-                        <p class="text-success ml-2 mb-0 font-weight-medium">+3.5%</p>
-                      </div> {% endcomment %}
+                        <h3 class="mb-0">USER_DETAILS</h3>
+                        <ul class="navbar-nav w-50 mx-5 ml-auto">
+                            <li class="nav-item w-50">
+                              <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search" method='GET' action="{% url 'User_search' %}">{% csrf_token %}
+                                <input type="text" class="form-control" placeholder="Search Users" name='q'>
+                                <button class="btn btn-primary mx-2" type="submit"> Search</button>
+                              </form>
+                            </li>
+                          </ul>
+                        </div>
+                        
+  
                       <div class="table-responsive">
                         <table class="table table-hover">
                           <thead>
@@ -77,14 +85,14 @@
                                     <button class="btn btn-success toggle-button"
                                             data-userid="{{ s.id }}"
                                             data-attribute="is_superuser">
-                                        {% if s.is_superuser %}False{% else %}True{% endif %}
+                                        {% if s.is_superuser %}superuser{% else %}Set_as_superuser{% endif %}
                                     </button>
                                 </td>
                                 <td>
                                     <button class="btn btn-warning toggle-button"
                                             data-userid="{{ s.id }}"
                                             data-attribute="is_staff">
-                                        {% if s.is_staff %}False{% else %}True{% endif %}
+                                        {% if s.is_staff %}staff{% else %}st_as staff{% endif %}
                                     </button>
                                 </td>
                                 

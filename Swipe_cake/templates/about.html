@@ -84,7 +84,8 @@
                             <div class="header__top__right__cart">
                                 <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>0</span></a>
                                 <div class="cart__price">Cart: <span>Rs.{{ cart_total }}</span></div></div>
-                                <div class="header__top__right__cart">
+                                <div class="header__top__right__cart" style="margin-left: 2vw">
+                                    <div class="header__top__right__cart" >
                                     <a href="#"><img src="{% static '/img/user-icon.png' %}" alt=""></a>
                                     </div>
                                 
@@ -106,8 +107,8 @@
             <div class="col-lg-12">
                 <nav class="header__menu mobile-menu">
                     <ul>
-                        <li class="active"><a href="{% url 'homeafter' %}">Home</a></li>
-                        <li><a href="{% url 'about' %}">About</a></li>
+                        <li ><a href="{% url 'homeafter' %}">Home</a></li>
+                        <li class="active"><a href="{% url 'about' %}">About</a></li>
                         <li><a href="./shop.html">Shop</a></li>
                         <li><a href="#">Pages</a>
                             <ul class="dropdown">

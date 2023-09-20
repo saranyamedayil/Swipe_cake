@@ -68,12 +68,24 @@ class CartItem(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return f"{self.quantity} x {self.product.product_name}"
+        return f"{self.user.username}'s cart: {self.quantity} x {self.product.product_name}"
     
     def get_product_image_url(self):
         return self.product.product_image.url if self.product.product_image else ''
 
     def get_product_name(self):
         return self.product.product_name if self.product else ''
+    
+
+class WishlistItem(models.Model):
+    user = models.ForeignKey(Custom_users, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product_Details, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.username}'s wishlist: {self.product.product_name}"
+    
+    def get_product_image_url(self):
+        return self.product.product_image.url if self.product.product_image else ''
+
     
 

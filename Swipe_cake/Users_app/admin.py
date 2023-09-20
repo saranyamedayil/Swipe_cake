@@ -3,12 +3,6 @@ from .models import*
 
 
 
-# Register your models here.
-# admin.site.register(Custom_users)
-# from django.contrib import admin
-# from .models import Custom_users
-# from .models import Product_Details
-# from .models import Product_Category
 
 
 def block_users(modeladmin, request, queryset):
@@ -31,5 +25,6 @@ class CustomUserAdmin(admin.ModelAdmin):
 admin.site.register(Product_Details)
 admin.site.register(Product_Category)
 admin.site.register(CartItem)
+admin.site.register(WishlistItem)
 
 

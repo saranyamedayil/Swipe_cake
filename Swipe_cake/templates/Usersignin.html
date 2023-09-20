@@ -54,7 +54,7 @@
                     <div class="col-lg-4">
                         <div class='text-center'>
                             <div style="width: 500px; height: 600px; background-color:white; border: 5px solid #fcb103; padding: 70px;">
-                     <form method="POST" action="{% url 'sentotp' %}">
+                     <form id="signup-form" method="POST" action="{% url 'sentotp' %}">
                      {% csrf_token %}
 
                      <h2 class="fw-bold text-uppercase">Sign up</h2>
@@ -109,81 +109,26 @@
 </div>
 </section>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="{% static 'js/custom.js' %}"></script>
 <script>
-    {% block script %}
-    $(document).ready(function() {
-    const form = document.querySelector("form");
-
-function showError(input, message) {
-const formControl = input.parentElement;
-formControl.classList.remove("success");
-formControl.classList.add("error");
-const label = formControl.querySelector("small");
-label.innerText = message;
-}
-
-function showSuccess(input) {
-const formControl = input.parentElement;
-formControl.classList.remove("error");
-formControl.classList.add("success");
-const label = formControl.querySelector("small");
-label.innerText = label.getAttribute("data-label");
-}
-
-function validatePassword(password) {
-const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-return passRegex.test(password);
-}
-
-form.addEventListener("submit", function(event) {
-event.preventDefault();
-
-const phonenumberInput = form.querySelector('[name="phonenumber"]');
-const usernameInput = form.querySelector('[name="username"]');
-const passwordInput = form.querySelector('[name="password"]');
-const confirmPasswordInput = form.querySelector('[name="confirmpassword"]');
-
-// Reset labels
-const labels = form.querySelectorAll("small");
-labels.forEach(label => {
-label.innerText = label.getAttribute("data-label");
-});
-
-let isValid = true;
-
-
-if (phonenumberInput.value.trim().length !== 10) {
-showError(phonenumberInput, "Invalid Number");
-isValid = false;
-} else {
-showSuccess(phonenumberInput);
-}
-
-// Other validation checks...
-
-if (!validatePassword(passwordInput.value.trim())) {
-showError(passwordInput, "Minimum eight characters, at least one uppercase letter, one lowercase letter, and one number");
-isValid = false;
-} else {
-showSuccess(passwordInput);
-}
-
-if (confirmPasswordInput.value.trim() !== passwordInput.value.trim()) {
-showError(confirmPasswordInput, "Password & confirm password must match");
-isValid = false;
-} else {
-showSuccess(confirmPasswordInput);
-}
-
-if (isValid) {
-form.submit();
-}
-});
-});
-{% endblock script %}
-</script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("signup-form");
+    
+        form.addEventListener("submit", function (event) {
+            const phonenumberField = form.querySelector("#id_phonenumber");
+            const phonenumberValue = phonenumberField.value;
+            const phonenumberRegex = /^\d{10}$/; // Regex for 10-digit phone number
+    
+            if (!phonenumberRegex.test(phonenumberValue)) {
+                event.preventDefault(); // Prevent form submission
+                alert("Please enter a valid 10-digit phone number.");
+                phonenumberField.focus();
+            }
+        });
+    });
+    </script>
 
 
 {% endblock content %}
+
+
 

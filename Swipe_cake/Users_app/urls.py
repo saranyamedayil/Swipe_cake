@@ -25,7 +25,7 @@ urlpatterns = [
     path('calculate_cart_total',views.calculate_cart_total),    
 
 
-    # path('addtocart',views.addtocart,name='addtocart'),
+    
 
 
 
@@ -35,12 +35,14 @@ urlpatterns = [
     path('adminlogout',views.Admin_logout,name='adminlogout'),
     path('adminprofile',views.Admin_profile,name='adminprofile'),
     path('Userdetails',views.Users_details,name='userdetails'),
+    path('User_search',views.User_search,name='User_search'),
     path('toggle_user_attribute/<int:user_id>/<str:attribute>/', views.toggle_user_attribute, name='toggle_user_attribute'),
     path('Product_Details',views.Product_Details_all,name='products'),
     path('Product_add',views.Product_add,name='productadd'),
     path('Productupdate/<int:product_id>/',views.Product_update,name='update'),
     path('Productupdate/<int:product_id>/do_update/',views.do_update,name='do_update'),
     path('Product_delete/<int:product_id>/',views.Product_delete,name='delete'),
+    path('Product_search',views.Product_search,name='Product_search'),
     path('productcategory',views.product_category_all,name='productcategory'),
     path('categoryadd',views.Category_add,name='categoryadd'),
     path('Categoryupdate/<int:category_id>/',views.Category_update,name='categoryupdate'),
