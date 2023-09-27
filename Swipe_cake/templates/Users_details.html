@@ -74,13 +74,21 @@
                                         {% if s.is_blocked %}Unblock{% else %}Block{% endif %}
                                     </button>
                                 </td> {% endcomment %}
-                                <td>
-                                    <button class="btn btn-danger toggle-button"
+                                {% comment %} <td>
+                                    <button id='blockUserButton' class="btn btn-danger toggle-button"
                                             data-userid="{{ s.id }}"
                                             data-attribute="is_blocked">
                                         {% if s.is_blocked %}Unblocked{% else %}Block{% endif %}
                                     </button>
+                                    
+
+                                </td> {% endcomment %}<td>
+                                    <button class="btn btn-danger toggle-button" data-userid="{{ s.id }}" data-attribute="is_blocked">
+                                        {% if s.is_blocked %}Unblocked{% else %}Block{% endif %}
+                                    </button>
                                 </td>
+
+
                                 <td>
                                     <button class="btn btn-success toggle-button"
                                             data-userid="{{ s.id }}"
@@ -106,52 +114,102 @@
     </div>
     <!-- page-body-wrapper ends -->
   </div>
-  <script>
-    {% block script %}
-        document.querySelectorAll('.toggle-button').forEach(button => {
-            button.addEventListener('click', function () {
-                var userId = $(this).data('userid');
-                var attribute = $(this).data('attribute');
-                var url = `/toggle_user_attribute/${userId}/${attribute}/`;
-    
-                // Send an AJAX POST request to the Django view
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('Network response was not ok');
-                    }
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Update the button text and style based on the response
-                        if (data.new_value) {
-                            this.textContent = `Unset ${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`;
-                            this.classList.remove('btn-success');
-                            this.classList.add('btn-danger');
-                        } else {
-                            this.textContent = `Set ${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`;
-                            this.classList.remove('btn-danger');
-                            this.classList.add('btn-success');
-                        }
-                    } else {
-                        console.error('Error updating user attribute:', data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            });
-        });
-    {% endblock script %}
-    </script>
-    
+  
 
   {% endblock content %}
+  {% block script %}
+  <script>
+
+       document.addEventListener("DOMContentLoaded", function () {
+        // Get all toggle buttons
+        document.querySelectorAll('.toggle-button').forEach(button => {
+          button.addEventListener('click', function () {
+            const userId = this.getAttribute('data-userid');
+            const attribute = this.getAttribute('data-attribute');
+            const actionText = this.textContent.trim();
+      
+            // Display the SweetAlert confirmation dialog
+            swal({
+              title: `Are you sure you want to ${actionText} this user?`,
+              icon: "warning",
+              buttons: ["Cancel", actionText],
+              dangerMode: true,
+            }).then((confirmed) => {
+              if (confirmed) {
+                // Send an AJAX request to block/unblock the user
+                toggleUserAttribute(userId, attribute);
+              }
+            });
+          });
+        });
+      
+        // Function to toggle the user attribute
+        function toggleUserAttribute(userId, attribute) {
+          // Send an AJAX request to the Django view to toggle the user attribute
+          fetch(`/toggle_user_attribute/${userId}/${attribute}/`, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': getCookie('csrftoken'), // You may need to replace this with the way you get the CSRF token
+              'Content-Type': 'application/json',
+            },
+          })
+            .then(response => {
+              if (response.ok) {
+                return response.json();
+              } else {
+                throw new Error('Network response was not ok');
+              }
+            })
+            .then(data => {
+              if (data.success) {
+                // Update the button text and style based on the response
+                const button = document.querySelector(`.toggle-button[data-userid="${userId}"][data-attribute="${attribute}"]`);
+                if (data.new_value) {
+                  button.textContent = `Unset ${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`;
+                  button.classList.remove('btn-success');
+                  button.classList.add('btn-danger');
+                } else {
+                  button.textContent = `Set ${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`;
+                  button.classList.remove('btn-danger');
+                  button.classList.add('btn-success');
+                }
+                // Display a success message
+                swal("Success!", data.message, "success");
+              } else {
+                console.error('Error updating user attribute:', data.error);
+                // Display an error message
+                swal("Error!", "An error occurred while updating the user attribute.", "error");
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              // Display an error message
+              swal("Error!", "An error occurred while updating the user attribute.", "error");
+            });
+        }
+      
+        // Function to get the CSRF token from a cookie
+        function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        }
+      });
+      
+
+
+    </script>
+
+
+    {% endblock script %}
+    

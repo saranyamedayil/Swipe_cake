@@ -26,5 +26,6 @@ admin.site.register(Product_Details)
 admin.site.register(Product_Category)
 admin.site.register(CartItem)
 admin.site.register(WishlistItem)
+admin.site.register(Users_Address)
 
 

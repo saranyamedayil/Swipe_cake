@@ -1,0 +1,387 @@
+{% extends 'index.html' %} 
+{% load static %}
+{% load cart_tags %}
+
+{% block title %}Swipe_cake|Chocolates {% endblock %}
+{% block content %}
+<!-- Page Preloder -->
+<div id="preloder">
+    <div class="loader"></div>
+</div>
+
+<!-- Offcanvas Menu Begin -->
+<div class="offcanvas-menu-overlay"></div>
+<div class="offcanvas-menu-wrapper">
+    <div class="offcanvas__cart">
+        <div class="offcanvas__cart__links">
+            <a href="#" class="search-switch"><img src="{% static '/img/icon/search.png' %}" alt=""></a>
+            <a href="#"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
+        </div>
+        <div class="offcanvas__cart__item">
+            <a href="#"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_total}}</span></a>
+            <div class="cart__price">Cart: <span>{{cart_total}}</span></div>
+        </div>
+    </div>
+    <div class="offcanvas__logo">
+        <a href="./index.html"><img src="{% static '/img/logo.png' %}" alt=""></a>
+    </div>
+    <div id="mobile-menu-wrap"></div>
+    <div class="offcanvas__option">
+        {% comment %} <ul>
+            <li>USD <span class="arrow_carrot-down"></span>
+                <ul>
+                    <li>EUR</li>
+                    <li>USD</li>
+                </ul>
+            </li>
+            <li>ENG <span class="arrow_carrot-down"></span>
+                <ul>
+                    <li>Spanish</li>
+                    <li>ENG</li>
+                </ul>
+            </li> {% endcomment %}
+            <li><a href="#">Sign in</a> <span class="arrow_carrot-down"></span></li>
+        </ul>
+    </div>
+</div>
+<!-- Offcanvas Menu End -->
+
+<!-- Header Section Begin -->
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header__top__inner">
+                        <div class="header__top__left">
+                            <h3 style="color: orange; font-weight: bold;">SWIPE_CAKE</h3>
+                            <ul>
+                                {% comment %} <li>USD <span class="arrow_carrot-down"></span>
+                                    <ul>
+                                        <li>EUR</li>
+                                        <li>USD</li>
+                                    </ul>
+                                </li>
+                                <li>ENG <span class="arrow_carrot-down"></span>
+                                    <ul>
+                                        <li>Spanish</li>
+                                        <li>ENG</li>
+                                    </ul>
+                                </li> {% endcomment %}
+                                {% comment %} <li><a href="#">Sign in</a> </li>
+                                <li> <a href="#">log in</a></li> {% endcomment %}
+                            </ul>
+                        </div>
+
+                        
+                        <div class="header__logo">
+                            <a href="./index.html"><img src="{% static '/img/logo.png' %}" alt=""></a>
+                        </div>
+                        <div class="header__top__right">
+                            <div class="header__top__right__links">
+                                <a href="#" class="search-switch"> <img src="{% static '/img/icon/search.png' %}" alt=""></a>
+                                <a href="{% url 'View_userswishlist' %}"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
+                            </div>
+                            <div class="header__top__right__cart">
+                                <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_count}}</span></a>
+                                <div class="cart__price">Cart: <span>₹{{cart_total}}</span></div></div>
+                                <div class="header__top__right__cart" style="margin-left: 2vw">
+                                    {% comment %} <nav class="header__menu mobile-menu">
+                                    <ul>
+                                        <li>
+                                            <a href="#"><img src="{% static '/img/user-icon.png' %}" alt=""></a>
+                                            <ul class='dropdown'>
+                                                <li><a href="./shop-details.html">Shop Details</a></li>
+                                                <li><a href="{% url 'view_cart' %}">Shopping Cart</a></li>
+                                                <li><a href="./checkout.html">Check Out</a></li>
+                                                <li><a href="{% url 'View_userswishlist' %}">Wishlist</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul> {% endcomment %}
+                                    <!-- Example split danger button -->
+                                </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-white"><img src="{% static '/img/user-icon.png' %}" alt=""></button>
+                        <button type="button" class="btn btn-white dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                      
+                        <li><a class="dropdown-item" href="#">Separated link</a></li>
+                        </ul>
+                    </div>
+                    
+                                    
+                                    
+                                    
+                                  
+                               
+                                
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas__open"><i class="fa fa-bars"></i></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a href="{% url 'homeafter' %}">Home</a></li>
+                        <li><a href="{% url 'about' %}">About</a></li>
+                        <li><a href="./shop.html">Shop</a></li>
+                        <li class="active"><a href="#">Pages</a>
+                            <ul class="dropdown">
+                                <li><a href="./shop-details.html">Shop Details</a></li>
+                                <li><a href="{% url 'view_cart' %}">Shoping Cart</a></li>
+                                <li><a href="./checkout.html">Check Out</a></li>
+                                <li><a href="{% url 'View_userswishlist' %}">Wisslist</a></li>
+                                {% comment %} <li><a href="./Class.html">Class</a></li>
+                                <li><a href="./blog-details.html">Blog Details</a></li> {% endcomment %}
+                            </ul>
+                        </li>
+                        <li><a href="#">Registration</a>
+                            <ul class="dropdown">
+                                <li><a href="./shop-details.html">Online Class</a></li>
+                                <li><a href="./shoping-cart.html">Offline Class</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                        {% comment %} {% comment %} <li><a href="./blog.html">login</a></li> {% endcomment %}
+                        <li><a href="{% url 'logout' %}">logout</a></li> 
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Header Section End -->
+
+    <!-- Breadcrumb Begin -->
+    <div class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="breadcrumb__text">
+                        <h2>Checkout</h2>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="breadcrumb__links">
+                        <a href="./index.html">Home</a>
+                        <span>Checkout</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Breadcrumb End -->
+
+    <section class="checkout spad">
+        <div class="container">
+            <div class="checkout__form">
+                <form name="addressForm" action="{% url 'save_address' %}" method='POST' onsubmit="return validateForm()">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-lg-8 col-md-6">
+                            <h6 class="coupon__code"><span class="icon_tag_alt"></span> Have a coupon? <a href="#">Click
+                            here</a> to enter your code</h6>
+                            <h6 class="checkout__title">Billing Details</h6>
+                           
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Fist Name<span>*</span></p>
+                                        <input type="text" name="first_name" id='first_name'>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Last Name<span>*</span></p>
+                                        <input type="text" name="last_name" id='last_name'>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checkout__input">
+                                <p>Country<span>*</span></p>
+                                <input type="text" name='country' id='country'>
+                            </div>
+                            <div class="checkout__input">
+                                <p>Address<span>*</span></p>
+                                <input type="text" placeholder="Street Address" class="checkout__input__add" name='street_address' id='street_address'>
+                                <input type="text" placeholder="Apartment, suite, unite ect (optinal)" name='apartment' id='apartment'>
+                            </div>
+                            <div class="checkout__input">
+                                <p>Town/City<span>*</span></p>
+                                <input type="text" name='city' id='city'>
+                            </div>
+                            <div class="checkout__input">
+                                <p>Country/State<span>*</span></p>
+                                <input type="text" name='state' id='state'>
+                            </div>
+                            <div class="checkout__input">
+                                <p>Postcode / ZIP<span>*</span></p>
+                                <input type="text" name='zipcode' id='zipcode'>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Phone<span>*</span></p>
+                                        <input type="text" name='phone' id='phone'>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Email<span>*</span></p>
+                                        <input type="text" name='email' id='email'>
+                                    </div>
+                                </div>
+                            </div>
+                        <div>
+                            <button class='btn-warning my-5' type="submit">save address</button>
+                        </div>
+                          
+                            <div class="checkout__input__checkbox">
+                                <label for="diff-acc">
+                                    Note about your order, e.g, special note for delivery
+                                    <input type="checkbox" id="diff-acc">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="checkout__input">
+                                <p>Order notes<span>*</span></p>
+                                <input type="text"
+                                placeholder="Notes about your order, e.g. special notes for delivery.">
+                            </div>
+                        </div>
+                        
+                        
+                      
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- Checkout Section End -->
+
+    {% endblock content %}
+
+    {% block scripts %}
+
+    <script>
+        function validateForm() {
+            // Get form input values
+            var firstName = document.getElementById("first_name").value;
+            var lastName = document.getElementById("last_name").value;
+            var country = document.getElementById("country").value;
+            var streetAddress = document.getElementById("street_address").value;
+            var apartment = document.getElementById("apartment").value; // Use a different variable name
+            var city = document.getElementById("city").value;
+            var state = document.getElementById("state").value;
+            var zipcode = document.getElementById("zipcode").value;
+            var phone = document.getElementById("phone").value;
+            var email = document.getElementById("email").value;
+        
+            // Regular expressions for validation
+            var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            var phoneRegex = /^[0-9]{10}$/; // Change this regex based on your phone number format
+            var zipCodeRegex = /^[0-9]{6}$/; // ZIP code should have exactly 6 digits
+            var cityRegex = /^[a-zA-Z\s]*$/; // Alphabets and spaces only for city
+            var stateRegex = /^[a-zA-Z\s]*$/; /
+        
+            // Validation checks for each field
+            if (firstName === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'First Name is required',
+                });
+                return false;
+            }
+        
+            if (lastName === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Last Name is required',
+                });
+                return false;
+            }
+        
+            if (country === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Country is required',
+                });
+                return false;
+            }
+        
+            if (streetAddress === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Street Address is required',
+                });
+                return false;
+            }
+        
+            if (city === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'City is required',
+                });
+                return false;
+            }
+        
+            if (state === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'State is required',
+                });
+                return false;
+            }
+        
+            if (zipcode === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'ZIP Code is required',
+                });
+                return false;
+            }
+        
+            if (!phone.match(phoneRegex)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Phone Number',
+                    text: 'Please enter a valid 10-digit phone number',
+                });
+                return false;
+            }
+        
+            if (!email.match(emailRegex)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Email',
+                    text: 'Please enter a valid email address',
+                });
+                return false;
+            }
+        
+            // If all validation checks pass, the form is valid
+            return true;
+        }
+        
+    </script>
+    
+    {% endblock scripts %}

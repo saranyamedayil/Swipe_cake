@@ -83,13 +83,13 @@
       <input type="password"  id="typePasswordX" class="form-control form-control-lg" name='confirmpassword' />
     <small></small>
     </div>
-    {% if messages %}
+    {% comment %} {% if messages %}
   <ul class="messages text-danger">
        {% for message in messages %}
   {{ message }}
    {% endfor %}
         </ul>
-{% endif %}
+{% endif %} {% endcomment %}
 
   
 <button class="primary-btn" type="submit">SEND OTP</button>
@@ -108,27 +108,74 @@
 </div>
 </div>
 </section>
+
+
+
+{% endblock content %}
+
+{% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("signup-form");
     
         form.addEventListener("submit", function (event) {
-            const phonenumberField = form.querySelector("#id_phonenumber");
-            const phonenumberValue = phonenumberField.value;
+            // Validate the username field
+            const usernameField = form.querySelector("#text");
+            const usernameValue = usernameField.value.trim();
+            if (usernameValue.length < 3) {
+                event.preventDefault();
+                alert("Username must be at least 3 characters."); // Show an alert box with the error message
+                usernameField.focus();
+            }
+
+            // Validate the phone number field
+            const phonenumberField = form.querySelector("#phonenumber");
+            const phonenumberValue = phonenumberField.value.trim();
             const phonenumberRegex = /^\d{10}$/; // Regex for 10-digit phone number
-    
             if (!phonenumberRegex.test(phonenumberValue)) {
-                event.preventDefault(); // Prevent form submission
-                alert("Please enter a valid 10-digit phone number.");
+                event.preventDefault();
+                alert("Please enter a valid 10-digit phone number."); // Show an alert box with the error message
                 phonenumberField.focus();
+            }
+
+            // Validate the password field
+            const passwordField = form.querySelector("#typePasswordX");
+            const passwordValue = passwordField.value.trim();
+            if (passwordValue.length < 6) {
+                event.preventDefault();
+                alert("Password must be at least 6 characters."); // Show an alert box with the error message
+                passwordField.focus();
+            }
+
+            // Validate the confirm password field
+            const confirmPasswordField = form.querySelector("#typePasswordX");
+            const confirmPasswordValue = confirmPasswordField.value.trim();
+            if (confirmPasswordValue !== passwordValue) {
+                event.preventDefault();
+                alert("Passwords do not match."); // Show an alert box with the error message
+                confirmPasswordField.focus();
             }
         });
     });
-    </script>
 
 
-{% endblock content %}
+    {% for msg in messages %}
+    Swal.fire({
+        title: 'warning',
+        text: '{{ msg }}',
+        icon: 'warning'
+    });
+    
+ 
+   
+   
+    {% endfor %}
+</script>
+
+
+{% endblock scripts %}
 
 
 

@@ -4,6 +4,28 @@
 {% block title %}Swipe_cake|Chocolates {% endblock %}
 {% block content %}
 
+<style>
+    /* Style the plus symbol to look like a button */
+    .increase {
+        cursor: pointer;
+       
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+    .decrease {
+        cursor: pointer;
+       
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    /* Style the input box */
+    .value {
+        border: none;
+        text-align: center;
+        width: 30px;
+    }
+</style>
 
 <!-- Page Preloder -->
 <div id="preloder">
@@ -82,8 +104,8 @@
                                 <a href="{% url 'View_userswishlist' %}"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
                             </div>
                             <div class="header__top__right__cart">
-                                <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>0</span></a>
-                                <div class="cart__price">Cart: <span>Rs.{{ cart_total }}</span></div></div>
+                                <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_count}}</span></a>
+                                <div class="cart__price">Cart: <span>{{ cart_total }}</span></div></div>
                                 <div class="header__top__right__cart" style="margin-left: 2vw">
                                     <a href="#"><img src="{% static '/img/user-icon.png' %}" alt=""></a>
                                     </div>
@@ -106,10 +128,10 @@
             <div class="col-lg-12">
                 <nav class="header__menu mobile-menu">
                     <ul>
-                        <li class="active"><a href="{% url 'homeafter' %}">Home</a></li>
+                        <li><a href="{% url 'homeafter' %}">Home</a></li>
                         <li><a href="{% url 'about' %}">About</a></li>
                         <li><a href="./shop.html">Shop</a></li>
-                        <li><a href="#">Pages</a>
+                        <li class="active"><a href="#">Pages</a>
                             <ul class="dropdown">
                                 <li><a href="./shop-details.html">Shop Details</a></li>
                                 <li><a href="{% url 'view_cart' %}">Shoping Cart</a></li>
@@ -174,34 +196,37 @@
                                 <th>Total</th>
                             </tr>
                         </thead>
+                        
                         <tbody>
                             {% for item in cart_items %}
                             <tr>
-                                <td><div class="product__cart__item__pic">
-                                    <img src="{{ item.get_product_image_url }}" alt="{{ item.get_product_name }}">
-                                </div> </td>
-
+                                <td>
+                                    <div class="product__cart__item__pic">
+                                        <img src="{{ item.get_product_image_url }}" alt="{{ item.get_product_name }}">
+                                    </div>
+                                </td>
                                 <td class="product__cart__item">
                                     <div class="product__cart__item__text">
                                         <h6>{{ item.product.product_name }}</h6>
-                                        <h5>Rs.{{ item.product.product_price }}</h5>
                                     </div>
-                                   
                                 </td>
-                                
                                 <td class="quantity__item">
                                     <div class="quantity">
-                                        <div class="pro-qty">
-                                            <input type="text" value="{{ item.quantity }}">
+                                        <div class="product">
+                                            <span class="decrease" data-item-id="{{ item.id }}">-</span>
+                                            <input type="text" class="value" value="{{ item.quantity }}" data-item-id="{{ item.id }}" data-item-quantity="{{ item.quantity }}">
+                                            <span class="increase" data-item-id="{{ item.id }}">+</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="cart__price">Rs.{{ item.product.product_price }}</td>
-                                <td>Rs.{{ item.product.product_price|mul:item.quantity }}</td>
-                                <td class="cart__close"><a href="{% url 'delete_from_cart' item.id %}"><span class="icon_close"></a></span></td>
+                                <td class="cart__price" id="item_price" data-item-id="{{ item.id }}">₹{{ item.product.product_price }}</td>
+                                <td id="product_total_price" data-item-id="{{ item.id }}">₹<span class="product-total-price">{{ item.product.product_price|mul:item.quantity }}</span></td>
+                                <td class="cart__close"><a href="{% url 'delete_from_cart' item.id %}"><span class="icon_close"></span></a></td>
                             </tr>
                             {% endfor %}
                         </tbody>
+                        
+                        
                     </table>
                 </div>
                 <div class="row">
@@ -243,13 +268,13 @@
                     <ul>
                         {% for category, subtotal in subtotal_dict.items %}
                 <li style="text-align: left; width: 50%; float: left;">{{ category }} Subtotal:</li>
-                <li style="text-align: right; width: 50%; float: right;">rs.{{ subtotal }}</li>
+                <li style="text-align: right; width: 50%; float: right;">₹{{ subtotal }}</li>
             {% endfor %}
             <li style="text-align: left; width: 50%; float: left;">Total:</li>
-            <li style="text-align: right; width: 50%; float: right;">rs.{{ cart_total }}</li>
+            <li style="text-align: right; width: 50%; float: right;">₹{{ cart_total }}</li>
         </ul>                                                               
                     </ul>
-                    <a href="#" class="primary-btn" style="clear: both;">Proceed to checkout</a>
+                    <a href="{% url 'Product_checkout' %}" class="primary-btn" style="clear: both;">Proceed to checkout</a>
                 </div>
                 
             </div>
@@ -259,79 +284,89 @@
 <!-- Shopping Cart Section End -->
 
 
-    <!-- Footer Section Begin -->
-    <footer class="footer set-bg" data-setbg="img/footer-bg.jpg">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="footer__widget">
-                        <h6>WORKING HOURS</h6>
-                        <ul>
-                            <li>Monday - Friday: 08:00 am – 08:30 pm</li>
-                            <li>Saturday: 10:00 am – 16:30 pm</li>
-                            <li>Sunday: 10:00 am – 16:30 pm</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="footer__about">
-                        <div class="footer__logo">
-                            <a href="#"><img src="img/footer-logo.png" alt=""></a>
-                        </div>
-                        <p></p>
-                        <div class="footer__social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                            <a href="#"><i class="fa fa-youtube-play"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="footer__newslatter">
-                        <h6>Subscribe</h6>
-                        <p>Get latest updates and offers.</p>
-                        <form action="#">
-                            <input type="text" placeholder="Email">
-                            <button type="submit"><i class="fa fa-send-o"></i></button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="copyright">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-7">
-                        <p class="copyright__text text-white"><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                          Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                          <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                      </p>
-                  </div>
-                  <div class="col-lg-5">
-                    <div class="copyright__widget">
-                        <ul>
-                            <li><a href="#">Privacy Policy</a></li>
-                            <li><a href="#">Terms & Conditions</a></li>
-                            <li><a href="#">Site Map</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
-<!-- Footer Section End -->
-
-<!-- Search Begin -->
-<div class="search-model">
-    <div class="h-100 d-flex align-items-center justify-content-center">
-        <div class="search-close-switch">+</div>
-        <form class="search-model-form">
-            <input type="text" id="search-input" placeholder="Search here.....">
-        </form>
-    </div>
-</div>
-<!-- Search End -->
+    
 
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    {% for msg in messages %}
+    Swal.fire({
+        title: 'success',
+        text: '{{ msg }}',
+        icon: 'success'
+    });
+    
+ 
+   
+   
+    {% endfor %}
+
+
+
+// Wait for the document to be ready
+$(document).ready(function () {
+    // Get the CSRF token from the cookie
+    const csrfToken = getCookie('csrftoken');
+
+    // Listen for click events on the increase and decrease spans
+    $('.increase, .decrease').click(function () {
+        // Get the item ID and current quantity from the data attributes
+        const itemID = $(this).data('item-id');
+        const valueInput = $('.value[data-item-id="' + itemID + '"]');
+        let currentValue = parseInt(valueInput.val());
+        
+        // Check if it's a decrease action and the current value is 1 or less
+        if ($(this).hasClass('decrease') && currentValue <= 1) {
+            return; // Prevent further execution
+        }
+
+        // Calculate the new quantity
+        const newQuantity = $(this).hasClass('increase') ? currentValue + 1 : currentValue - 1;
+
+        // Update the input field with the new quantity
+        valueInput.val(newQuantity);
+
+        // Send a POST request to update the quantity on the server
+        $.ajax({
+            type: 'POST',
+            url: `/update_quantity/${itemID}/`, // Replace with your actual URL
+            data: { new_quantity: newQuantity },
+            headers: { "X-CSRFToken": csrfToken }, // Include the CSRF token in headers
+            success: function (data) {
+                if (data.success) {
+                    // Handle success, e.g., update the total price
+                    updateTotalPrice(itemID, newQuantity);
+                } else {
+                    // Handle failure, e.g., show an error message
+                    alert('Quantity update failed: ' + data.error);
+                }
+            },
+            error: function () {
+                // Handle AJAX error
+                alert('An error occurred during the request');
+            }
+        });
+    });
+
+    // Function to update the total price based on the new quantity
+    function updateTotalPrice(itemID, newQuantity) {
+        const itemPrice = parseFloat($(`#item_price[data-item-id="${itemID}"]`).text().replace('₹', ''));
+        const total = itemPrice * newQuantity;
+        $(`#product_total_price[data-item-id="${itemID}"]`).html(`₹<span class="product-total-price">${total.toFixed(2)}</span>`);
+    }
+
+    // Function to get the CSRF token from cookies
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+});
+
+
+
+</script>
+
+
+{% endblock scripts %}

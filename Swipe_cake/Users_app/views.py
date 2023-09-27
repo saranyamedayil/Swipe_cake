@@ -17,8 +17,11 @@ from django.db.models import Q
 
 # Create your views here.
 def Users_homebefore(request):
-    message = 'please login your account'
-    return render(request, 'home_before.html', {'msg': message})
+    messages.error(request, 'please login your account')
+    products={
+        'product':Product_Details.objects.all()
+    }
+    return render(request, 'home_before.html', products)
 
 
 
@@ -97,7 +100,8 @@ def sent_otp(request):
                     otp = random.randint(100000, 999999)
                     otp_to_ph = str(otp)
                     print(".............................", otp_to_ph)
-                    user.password = password
+                    # send_otp_phone(otp_to_ph)
+                    user.password = password    
                     user.save()
 
                     # Save user information in the session
@@ -208,6 +212,7 @@ def Users_homeafter(request):
 
             subtotal_dict = {}
             total = Decimal(0)
+            cart_count = 0  # Initialize cart count
 
             for item in cart_items:
                 # Calculate the total price for each cart item
@@ -221,9 +226,13 @@ def Users_homeafter(request):
 
                 # Add item total to the total
                 total += item_total
+                cart_count += item.quantity
+                
 
             # Add 'cart_total' to the context
             context['cart_total'] = total
+            context['cart_count'] = cart_count
+
 
             return render(request, "home_after.html", context)  # Pass the context with 'cart_total'
     
@@ -311,6 +320,7 @@ def Users_details(request):
     return render(request,'Users_details.html',user)
 
 
+
 def toggle_user_attribute(request, user_id, attribute):
     user = get_object_or_404(Custom_users, id=user_id)
 
@@ -323,7 +333,11 @@ def toggle_user_attribute(request, user_id, attribute):
         current_value = getattr(user, attribute)
         setattr(user, attribute, not current_value)
         user.save()
-        return JsonResponse({'success': True, 'new_value': not current_value})
+
+        # Prepare the response message based on the current status
+        message = f"User {user.username} has been {'blocked' if not current_value else 'unblocked'}."
+
+        return JsonResponse({'success': True, 'new_value': not current_value, 'message': message})
     else:
         return JsonResponse({'success': False, 'error': 'Attribute not found'})
     
@@ -546,6 +560,8 @@ def Do_Category_update(request,category_id ):
 
     return redirect(product_category_all)
 
+
+
 def Category_delete(request,category_id):
   if request.method == 'POST':
     product = get_object_or_404(Product_Category, category_id=category_id)
@@ -562,7 +578,7 @@ def Category_delete(request,category_id):
 #......................product arrange in category wise..................................
 
 class ProductCategoryView(ListView):
-    template_name = 'product_categorywise.html'  # Replace with your desired template name
+    template_name = 'product_categorywise.html'  
     context_object_name = 'products'
 
     def get_queryset(self):
@@ -585,8 +601,10 @@ class ProductCategoryView(ListView):
 
             if username:
                 user = Custom_users.objects.get(username=username)
-                total = calculate_cart_total(user)
+                total,cart_count = calculate_cart_total(user)
                 context['cart_total'] = total  # Add 'cart_total' to the context
+                context['cart_count'] = cart_count
+                
 
         context['category_name'] = category_name
         return context
@@ -599,85 +617,77 @@ class ProductCategoryView(ListView):
 
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product_Details, product_id=product_id)
-    
-    # Retrieve the username from the session
-    username = request.session.get('username')
-    
-    # Get the user object associated with the username
-    user = Custom_users.objects.get(username=username)
-    
-    # Check if the user already has this product in their cart
-    existing_cart_item = CartItem.objects.filter(user=user, product=product).first()
-    
-    if existing_cart_item:
-        # Update the quantity of the existing cart item
-        existing_cart_item.quantity += 1
-        existing_cart_item.save()
-    else:
-        # Create a new cart item for the user
-        new_cart_item = CartItem(user=user, product=product, quantity=1)
-        new_cart_item.save()
-        messages.success(request, 'Product added to your cart')
-
-            # Remove the product from the wishlist
-        WishlistItem.objects.filter(user=user, product=product).delete()
-
-    
-    return redirect(Users_homeafter)  # Redirect to product list page
-
-
-
-
-def view_cart(request):
-    # Retrieve the username from the session
     username = request.session.get('username')
 
     if username:
-        # Get the user object associated with the username
         user = Custom_users.objects.get(username=username)
+        existing_cart_item = CartItem.objects.filter(user=user, product=product).first()
+        
+        if existing_cart_item:
+            existing_cart_item.quantity += 1
+            existing_cart_item.save()
+        else:
+            new_cart_item = CartItem(user=user, product=product, quantity=1)
+            new_cart_item.save()
+            messages.success(request, 'Product added to your cart')
 
+            WishlistItem.objects.filter(user=user, product=product).delete()
+        
+       
+        return redirect('homeafter')  # Replace 'view_cart' with the actual URL name of your cart page
+
+def update_quantity(request, item_id):
+    if request.method == 'POST':
+        new_quantity = int(request.POST.get('new_quantity', 0))
+
+        if new_quantity >= 0:
+            try:
+                item = CartItem.objects.get(id=item_id)
+                item.quantity = new_quantity
+                item.save()
+                return JsonResponse({'success': True})
+            except CartItem.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Item not found'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+def view_cart(request):
+    username = request.session.get('username')
+
+    if username:
+        user = Custom_users.objects.get(username=username)
         cart_items = CartItem.objects.filter(user=user)
 
         subtotal_dict = {}
-        total =Decimal(0)
+        total = Decimal(0)
+
         for item in cart_items:
-        # Calculate the total price for each cart item
             item_total = item.quantity * item.product.product_price
+
             if item.product.product_category.category_name in subtotal_dict:
-                # If it exists, add the item total to the existing subtotal
                 subtotal_dict[item.product.product_category.category_name] += item_total
             else:
-                # If it doesn't exist, create a new entry
                 subtotal_dict[item.product.product_category.category_name] = item_total
 
-            # Add item total to the total
             total += item_total
 
         return render(request, 'shoping-cart.html', {'cart_items': cart_items, 'subtotal_dict': subtotal_dict, 'cart_total': total})
     else:
-        # User is not logged in, so provide a login form
         messages.warning(request, 'Please log in to view your cart.')
-        return redirect('login')  # Redirect to your login page name
-
+        return redirect('login')
 
 def delete_from_cart(request, item_id):
     username = request.session.get('username')
+    
     if username:
-        # Get the user object associated with the username
         user = Custom_users.objects.get(username=username)
-
-        
-    # Get the cart item to delete
         cart_item = get_object_or_404(CartItem, id=item_id, user=user)
-
-    # Delete the cart item
         cart_item.delete()
+        messages.success(request, 'Product removed from cart')
 
-    # Redirect back to the cart page or any other desired page
-    return redirect(view_cart)
-
-
-
+    return redirect('view_cart')
 
 
 #............................................ calculating the cart total into seperate function ...................................
@@ -685,13 +695,16 @@ def delete_from_cart(request, item_id):
 def calculate_cart_total(user):
     cart_items = CartItem.objects.filter(user=user)
     total = Decimal(0)
+    cart_count = 0
+    
 
     for item in cart_items:
         # Calculate the total price for each cart item
         item_total = item.quantity * item.product.product_price
         total += item_total
+        cart_count += item.quantity
 
-    return total
+    return total,cart_count
 
 
 #???????????????????????????????????? about page ????????????????????????
@@ -699,13 +712,16 @@ def calculate_cart_total(user):
 def about(request):
     username = request.session.get('username')
     total = Decimal(0)  # Default total for unauthenticated users
+    cart_count = 0  # Default cart count
 
     if username:
         # Get the user object associated with the username
         user = Custom_users.objects.get(username=username)
-        total = calculate_cart_total(user)
+        total,cart_count = calculate_cart_total(user)
+    
+        
 
-    return render(request, 'about.html', {'cart_total': total})
+    return render(request, 'about.html', {'cart_total': total,'cart_count': cart_count})
 
 
 
@@ -714,13 +730,14 @@ def about(request):
 def contact(request):
     username = request.session.get('username')
     total = Decimal(0)  # Default total for unauthenticated users
+    cart_count = 0  # Default cart count
 
     if username:
         # Get the user object associated with the username
         user = Custom_users.objects.get(username=username)
-        total = calculate_cart_total(user)
+        total,cart_count = calculate_cart_total(user)
 
-    return render(request,'contact.html',{'cart_total': total})
+    return render(request,'contact.html',{'cart_total': total,'cart_count': cart_count})
 
 
 
@@ -758,12 +775,14 @@ def Users_wishlist(request,product_id):
 def View_userswishlist(request):
     username = request.session.get('username')
     total = Decimal(0)  # Default total for unauthenticated users
+    cart_count = 0  # Default cart count
+
 
    
 
     if username:
         user=Custom_users.objects.get(username=username)
-        total = calculate_cart_total(user)
+        total,cart_count = calculate_cart_total(user)
 
         wishlist_items=WishlistItem.objects.filter(user=user)
 
@@ -772,7 +791,7 @@ def View_userswishlist(request):
         return redirect(Users_login)
     
 
-    return render(request,'User_wishlist.html',{'wishlist':wishlist_items,'cart_total': total})
+    return render(request,'User_wishlist.html',{'wishlist':wishlist_items,'cart_total': total,'cart_count': cart_count})
 
 
 def delete_from_wishlist(request, item_id):
@@ -782,25 +801,176 @@ def delete_from_wishlist(request, item_id):
         user = Custom_users.objects.get(username=username)
 
         
-    # Get the cart item to delete
+    # Get the wishlist item to delete
         wishlist_item = get_object_or_404(WishlistItem, id=item_id, user=user)
 
-    # Delete the cart item
+    # Delete the wishlist item
         wishlist_item.delete()
+        messages.success(request,'product removed from wishlist')
 
     # Redirect back to the wishlist page 
     return redirect(View_userswishlist)
 
 
 
+def product_described(request,product_id):
+    username=request.session.get('username')
+    product = get_object_or_404(Product_Details, product_id=product_id)
+    related_products = get_related_products(product_id)
+    total = Decimal(0)  # Default total for unauthenticated users
+    cart_count = 0  # Default cart count
+
+    
+    if username:
+        user=Custom_users.objects.get(username=username)
+        total,cart_count = calculate_cart_total(user)
+        context = {
+        'product': product,
+        'related_products': related_products,
+        'cart_total': total,
+        'cart_count': cart_count
+    }
+        
+
+    return render(request,'Described_Productdetails.html',context)
+
+
+def get_related_products(product_id):
+    # Get the product for which you want to find related products
+    product = get_object_or_404(Product_Details, product_id=product_id)
+
+    # Define criteria for related products (e.g., same category)
+    related_products = Product_Details.objects.filter(
+        product_category=product.product_category  # Assuming category is a ForeignKey
+    ).exclude(product_id=product_id)  # Exclude the current product from the list
+
+    # You can further refine the criteria based on your needs (e.g., matching tags)
+
+    return related_products
+
+
+def Product_checkout(request):
+    username = request.session.get('username')
+    cart_count = 0  # Default cart count
+
+    if username:
+        user = Custom_users.objects.get(username=username)
+        cart_items = CartItem.objects.filter(user=user)
+        subtotal_dict = {}
+
+        total, cart_count = calculate_cart_total(user)  # Calculate the cart total and count
+
+        # Convert the Decimal total to a float and format it as needed
+        total_float = float(total)
+
+        for item in cart_items:
+            item_total = item.quantity * item.product.product_price
+
+            if item.product.product_category.category_name in subtotal_dict:
+                subtotal_dict[item.product.product_category.category_name] += item_total
+            else:
+                subtotal_dict[item.product.product_category.category_name] = item_total
+
+        return render(request, 'product_checkout.html', {'cart_items': cart_items, 'subtotal_dict': subtotal_dict, 'cart_total': total_float, 'cart_count': cart_count})
 
 
 
 
+def New_address(request):
+    username = request.session.get('username')
+    total = Decimal(0)  # Default total for unauthenticated users
+    cart_count = 0  # Default cart count
 
 
+   
+
+    if username:
+        user=Custom_users.objects.get(username=username)
+        total,cart_count = calculate_cart_total(user)
+
+    return render(request,'add_address.html',{'cart_total': total,'cart_count': cart_count})
 
 
+def save_address(request):
+
+    if request.method == 'POST':
+        # Retrieve the form data
+        
+
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        country = request.POST.get('country')
+        street_address = request.POST.get('street_address')
+        apartment = request.POST.get('apartment')
+        city = request.POST.get('city')
+        state = request.POST.get('state')
+        zipcode = request.POST.get('zipcode')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+
+        username=request.session.get('username')
+        user=Custom_users.objects.get(username=username)
+
+        # Create and save the new address
+        address = Users_Address(
+            user=user,
+            first_name=first_name,
+            last_name=last_name,
+            country=country,
+            street_address=street_address,
+            apartment=apartment,
+            city=city,
+            state=state,
+            zipcode=zipcode,
+            phone=phone,
+            email=email
+        )
+        address.save()
+
+        # Redirect to a success page or any other desired page
+        return redirect('Product_checkout')  # Update with the appropriate URL name
+
+    # If the request method is not POST, render the form page
+    return render(request, 'add_address.html')  # Update with the appropriate template name
+
+
+def Saved_address(request):
+   
+    return render(request,'product_checkout.html')
+
+def get_saved_addresses(request):
+    # Assuming you have a way to identify the logged-in user
+    username = request.session.get('username')  # Update this to get the correct user
+    user=Custom_users.objects.get(username=username)
+
+    # Fetch the user's saved addresses from the database
+    saved_addresses = Users_Address.objects.filter(user=user)
+    print(saved_addresses,"...........................................")
+
+    # Convert the queryset to a list of dictionaries
+   
+    saved_addresses_data = [
+        {
+            'id': address.id,
+            'name': f"{address.first_name} {address.last_name}",
+            'address': address.street_address,
+            'first_name': address.first_name,
+            'last_name': address.last_name,
+            'country': address.country,
+            'street_address': address.street_address,
+            'apartment': address.apartment,
+            'city': address.city,
+            'state': address.state,
+            'zipcode': address.zipcode,
+            'phone': address.phone,
+            'email': address.email,
+        }
+        for address in saved_addresses
+    ]
+        
+    
+
+    return JsonResponse({'savedAddresses': saved_addresses_data})
 
 
 

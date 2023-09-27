@@ -44,7 +44,7 @@
 
                         
                         <li><a href="./contact.html">Contact</a></li>
-                        <li><a href="User_signin">signin</a></li> 
+                        <li><a href="User_signin">sign up</a></li> 
                        
                     
                     </ul>
@@ -75,13 +75,13 @@
                                 <label for="password" >password</label>
                                 <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
                             </div>
-                            {% if messages %}
+                            {% comment %} {% if messages %}
                                 <ul class="messages text-danger">
                                 {% for message in messages %}
                                      {{ message }}
                                 {% endfor %}
                                  </ul>
-                            {% endif %}
+                            {% endif %} {% endcomment %}
                             <button class="primary-btn" type="submit">login</button>
                         </form>
                     </div>

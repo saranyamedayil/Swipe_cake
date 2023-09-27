@@ -23,7 +23,13 @@ urlpatterns = [
     path('about',views.about,name='about'),
     path('contact',views.contact,name='contact'),
     path('calculate_cart_total',views.calculate_cart_total),    
-
+    path('product_described/<int:product_id>/',views.product_described,name='product_described'),
+    path('update_quantity/<int:item_id>/',views.update_quantity,name='update_quantity'),
+    path('Product_checkout',views.Product_checkout,name='Product_checkout'),
+    path('New_address',views.New_address,name='New_address'),
+    path('Saved_address',views.Saved_address,name='Saved_address'),
+    path('save_address',views.save_address,name='save_address'),
+    path('get_saved_addresses/',views.get_saved_addresses,name='get_saved_addresses'),
 
     
 

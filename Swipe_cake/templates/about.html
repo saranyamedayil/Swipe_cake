@@ -19,7 +19,7 @@
             <a href="#"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
         </div>
         <div class="offcanvas__cart__item">
-            <a href="#"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_total}}</span></a>
+            <a href="#"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_count}}</span></a>
             <div class="cart__price">Cart: <span>{{cart_total}}</span></div>
         </div>
     </div>
@@ -82,7 +82,7 @@
                                 <a href="#"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
                             </div>
                             <div class="header__top__right__cart">
-                                <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>0</span></a>
+                                <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{ cart_count }}</span></a>
                                 <div class="cart__price">Cart: <span>Rs.{{ cart_total }}</span></div></div>
                                 <div class="header__top__right__cart" style="margin-left: 2vw">
                                     <div class="header__top__right__cart" >
@@ -175,8 +175,13 @@
                             <span>About Cake shop</span>
                             <h2>Cakes and bakes from the house of Queens!</h2>
                         </div>
-                        <p>The "Cake Shop" is a Jordanian Brand that started as a small family business. The owners are
-                        Dr. Iyad Sultan and Dr. Sereen Sharabati, supported by a staff of 80 employees.</p>
+                        <p>Welcome to SWIPE_CAKE, your ultimate destination for delightful confections and sweet 
+                            indulgence! We're passionate about crafting cakes that are not only visually 
+                            stunning but also a treat for your taste buds.</p>
+                            <P>Explore our mouthwatering selection of cakes, each a masterpiece of flavor and artistry. 
+                                From classic chocolate and vanilla to exotic fruit-infused creations, our cakes are made with the finest ingredients and 
+                                a sprinkle of love. Whether you're celebrating
+                                 a birthday, wedding, anniversary, or simply craving a sweet slice of heaven, we have the perfect cake for every occasion.</P>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
@@ -438,80 +443,5 @@
     </section>
     <!-- Team Section End -->
 
-    <!-- Footer Section Begin -->
-    <footer class="footer set-bg" data-setbg="img/footer-bg.jpg">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="footer__widget">
-                        <h6>WORKING HOURS</h6>
-                        <ul>
-                            <li>Monday - Friday: 08:00 am – 08:30 pm</li>
-                            <li>Saturday: 10:00 am – 16:30 pm</li>
-                            <li>Sunday: 10:00 am – 16:30 pm</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="footer__about">
-                        <div class="footer__logo">
-                            <a href="#"><img src="img/footer-logo.png" alt=""></a>
-                        </div>
-                        <p>Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                        labore dolore magna aliqua.</p>
-                        <div class="footer__social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                            <a href="#"><i class="fa fa-youtube-play"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="footer__newslatter">
-                        <h6>Subscribe</h6>
-                        <p>Get latest updates and offers.</p>
-                        <form action="#">
-                            <input type="text" placeholder="Email">
-                            <button type="submit"><i class="fa fa-send-o"></i></button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="copyright">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-7">
-                        <p class="copyright__text text-white"><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                          Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                          <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                      </p>
-                  </div>
-                  <div class="col-lg-5">
-                    <div class="copyright__widget">
-                        <ul>
-                            <li><a href="#">Privacy Policy</a></li>
-                            <li><a href="#">Terms & Conditions</a></li>
-                            <li><a href="#">Site Map</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
-<!-- Footer Section End -->
-
-<!-- Search Begin -->
-<div class="search-model">
-    <div class="h-100 d-flex align-items-center justify-content-center">
-        <div class="search-close-switch">+</div>
-        <form class="search-model-form">
-            <input type="text" id="search-input" placeholder="Search here.....">
-        </form>
-    </div>
-</div>
-<!-- Search End -->
 
 {% endblock content %}

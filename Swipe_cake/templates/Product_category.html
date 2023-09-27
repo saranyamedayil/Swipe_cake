@@ -65,52 +65,7 @@
     </div>
     <!-- page-body-wrapper ends -->
   </div>
-  <script>
-    {% block script %}
-        document.querySelectorAll('.toggle-button').forEach(button => {
-            button.addEventListener('click', function () {
-                var userId = $(this).data('userid');
-                var attribute = $(this).data('attribute');
-                var url = `/toggle_user_attribute/${userId}/${attribute}/`;
-    
-                // Send an AJAX POST request to the Django view
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('Network response was not ok');
-                    }
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Update the button text and style based on the response
-                        if (data.new_value) {
-                            this.textContent = `Unset ${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`;
-                            this.classList.remove('btn-success');
-                            this.classList.add('btn-danger');
-                        } else {
-                            this.textContent = `Set ${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`;
-                            this.classList.remove('btn-danger');
-                            this.classList.add('btn-success');
-                        }
-                    } else {
-                        console.error('Error updating user attribute:', data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            });
-        });
-    {% endblock script %}
-    </script>
-    
 
   {% endblock content %}
+ 
+ 

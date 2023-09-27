@@ -89,3 +89,23 @@ class WishlistItem(models.Model):
 
     
 
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>User address >>>>>>>>>>>>>>>>>>>>>>>....
+
+class Users_Address(models.Model):
+    user = models.ForeignKey(Custom_users, on_delete=models.CASCADE,null=True)  # Add a ForeignKey to link to the User model
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+    street_address = models.CharField(max_length=255)
+    apartment = models.CharField(max_length=255, blank=True, null=True)  # Optional field
+    city = models.CharField(max_length=255)
+    state = models.CharField(max_length=255, default='YourDefaultStateValue')  # Default value for 'state'
+    zipcode = models.CharField(max_length=255)
+    phone = models.CharField(max_length=10)
+    email = models.EmailField()
+
+    def __str__(self):
+        return f"{self.user} - {self.first_name} {self.last_name}"
+    

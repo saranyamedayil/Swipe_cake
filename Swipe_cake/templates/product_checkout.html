@@ -1,0 +1,388 @@
+{% extends 'index.html' %} 
+{% load static %}
+{% load cart_tags %}
+{% load custom_filters %}
+{% block title %}Swipe_cake|Chocolates {% endblock %}
+{% block content %}
+<!-- Page Preloder -->
+<div id="preloder">
+    <div class="loader"></div>
+</div>
+
+<!-- Offcanvas Menu Begin -->
+<div class="offcanvas-menu-overlay"></div>
+<div class="offcanvas-menu-wrapper">
+    <div class="offcanvas__cart">
+        <div class="offcanvas__cart__links">
+            <a href="#" class="search-switch"><img src="{% static '/img/icon/search.png' %}" alt=""></a>
+            <a href="#"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
+        </div>
+        <div class="offcanvas__cart__item">
+            <a href="#"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_total}}</span></a>
+            <div class="cart__price">Cart: <span>{{cart_total}}</span></div>
+        </div>
+    </div>
+    <div class="offcanvas__logo">
+        <a href="./index.html"><img src="{% static '/img/logo.png' %}" alt=""></a>
+    </div>
+    <div id="mobile-menu-wrap"></div>
+    <div class="offcanvas__option">
+        {% comment %} <ul>
+            <li>USD <span class="arrow_carrot-down"></span>
+                <ul>
+                    <li>EUR</li>
+                    <li>USD</li>
+                </ul>
+            </li>
+            <li>ENG <span class="arrow_carrot-down"></span>
+                <ul>
+                    <li>Spanish</li>
+                    <li>ENG</li>
+                </ul>
+            </li> {% endcomment %}
+            <li><a href="#">Sign in</a> <span class="arrow_carrot-down"></span></li>
+        </ul>
+    </div>
+</div>
+<!-- Offcanvas Menu End -->
+
+<!-- Header Section Begin -->
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header__top__inner">
+                        <div class="header__top__left">
+                            <h3 style="color: orange; font-weight: bold;">SWIPE_CAKE</h3>
+                            <ul>
+                                {% comment %} <li>USD <span class="arrow_carrot-down"></span>
+                                    <ul>
+                                        <li>EUR</li>
+                                        <li>USD</li>
+                                    </ul>
+                                </li>
+                                <li>ENG <span class="arrow_carrot-down"></span>
+                                    <ul>
+                                        <li>Spanish</li>
+                                        <li>ENG</li>
+                                    </ul>
+                                </li> {% endcomment %}
+                                {% comment %} <li><a href="#">Sign in</a> </li>
+                                <li> <a href="#">log in</a></li> {% endcomment %}
+                            </ul>
+                        </div>
+
+                        
+                        <div class="header__logo">
+                            <a href="./index.html"><img src="{% static '/img/logo.png' %}" alt=""></a>
+                        </div>
+                        <div class="header__top__right">
+                            <div class="header__top__right__links">
+                                <a href="#" class="search-switch"> <img src="{% static '/img/icon/search.png' %}" alt=""></a>
+                                <a href="{% url 'View_userswishlist' %}"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
+                            </div>
+                            <div class="header__top__right__cart">
+                                <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_count}}</span></a>
+                                <div class="cart__price">Cart: <span>₹{{cart_total}}</span></div></div>
+                                <div class="header__top__right__cart" style="margin-left: 2vw">
+                                    {% comment %} <nav class="header__menu mobile-menu">
+                                    <ul>
+                                        <li>
+                                            <a href="#"><img src="{% static '/img/user-icon.png' %}" alt=""></a>
+                                            <ul class='dropdown'>
+                                                <li><a href="./shop-details.html">Shop Details</a></li>
+                                                <li><a href="{% url 'view_cart' %}">Shopping Cart</a></li>
+                                                <li><a href="./checkout.html">Check Out</a></li>
+                                                <li><a href="{% url 'View_userswishlist' %}">Wishlist</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul> {% endcomment %}
+                                    <!-- Example split danger button -->
+                                </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-white"><img src="{% static '/img/user-icon.png' %}" alt=""></button>
+                        <button type="button" class="btn btn-white dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                      
+                        <li><a class="dropdown-item" href="#">Separated link</a></li>
+                        </ul>
+                    </div>
+                    
+                                    
+                                    
+                                    
+                                  
+                               
+                                
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas__open"><i class="fa fa-bars"></i></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a href="{% url 'homeafter' %}">Home</a></li>
+                        <li><a href="{% url 'about' %}">About</a></li>
+                        <li><a href="./shop.html">Shop</a></li>
+                        <li class="active"><a href="#">Pages</a>
+                            <ul class="dropdown">
+                                <li><a href="./shop-details.html">Shop Details</a></li>
+                                <li><a href="{% url 'view_cart' %}">Shoping Cart</a></li>
+                                <li><a href="./checkout.html">Check Out</a></li>
+                                <li><a href="{% url 'View_userswishlist' %}">Wisslist</a></li>
+                                {% comment %} <li><a href="./Class.html">Class</a></li>
+                                <li><a href="./blog-details.html">Blog Details</a></li> {% endcomment %}
+                            </ul>
+                        </li>
+                        <li><a href="#">Registration</a>
+                            <ul class="dropdown">
+                                <li><a href="./shop-details.html">Online Class</a></li>
+                                <li><a href="./shoping-cart.html">Offline Class</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                        {% comment %} {% comment %} <li><a href="./blog.html">login</a></li> {% endcomment %}
+                        <li><a href="{% url 'logout' %}">logout</a></li> 
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Header Section End -->
+
+    <!-- Breadcrumb Begin -->
+    <div class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="breadcrumb__text">
+                        <h2>Checkout</h2>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="breadcrumb__links">
+                        <a href="./index.html">Home</a>
+                        <span>Checkout</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Breadcrumb End -->
+
+    <!-- Checkout Section Begin -->
+    <section class="checkout spad">
+        <div class="container">
+            <div class="checkout__form">
+                <form action="#">
+                    <div class="row">
+                        <div class="col-lg-8<div class="col-lg-4">
+                            <div class="cart__discount">
+                                <h6>Discount codes</h6>
+                                <form action="#">
+                                    <input type="text" placeholder="Coupon code">
+                                    <button type="submit">Apply</button>
+                                </form>
+                            </div> col-md-6">
+                            
+                            <h6 class="checkout__title">Billing Details</h6>
+                           <div class="checkout__input__checkbox">
+                            <label for="add-new-address">
+                                Add new address
+                                <input type="checkbox" id="add-new-address">
+                                <span class="checkmark"><a href="{% url 'New_address' %}"></a></span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkout__input__checkbox">
+                            <input type="checkbox" id="show-default-address">
+                            <label for="show-default-address">Save address</label>
+                        </div>
+                        
+                        <div id="saved-addresses" style="display: none;" class='ms-5'>
+                            <label for="saved-address-details">Saved Address Details:</label>
+                            <div id="saved-address-details">
+                              
+                                <!-- Address details will be displayed here when the checkbox is checked -->
+                            </div>
+                        </div>
+                        
+                            <div class="checkout__input__checkbox">
+                                <label for="diff-acc">
+                                    Note about your order, e.g, special note for delivery
+                                    <input type="checkbox" id="diff-acc">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="checkout__input">
+                                <p>Order notes<span>*</span></p>
+                                <input type="text"
+                                placeholder="Notes about your order, e.g. special notes for delivery.">
+                            </div>
+                        </div>
+                        
+                      
+                        <div class="col-lg-4 col-md-6">
+                            
+                            <div class="checkout__order">
+                                
+                                <h6 class="order__title">Your order</h6>
+                                <div class="checkout__order__products">Product <span>Total</span></div>
+                                <ul class="checkout__total__products">
+                                    {% for category, subtotal in subtotal_dict.items %}
+                                    {% for item in cart_items %}
+                                        <samp>{{forloop.counter}}</samp>
+                                            
+                                          <samp style="margin-left: 1vw"> 
+                                            {{item.product.product_name}} {{item.product.product_price}} * {{item.quantity}}</samp>  <span style="margin-left: 3vw">₹{{ item.product.product_price|mul:item.quantity }}</span>
+                                            
+                                    
+                                </ul>
+                                {% endfor %}
+                                <ul class="checkout__total__all">
+                                    <li>Subtotal <span>₹{{ subtotal }}</span></li>
+                                    <li>Total <span>₹{{cart_total}}</span></li>
+                                </ul>
+                               
+                                {% endfor %}
+                               
+                                <div class="checkout__input__checkbox">
+                                    <label for="payment">
+                                        cash on delivery
+                                        <input type="checkbox" id="payment">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <div class="checkout__input__checkbox">
+                                    <label for="paypal">
+                                        online payment
+                                        <input type="checkbox" id="paypal">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <button type="submit" class="site-btn">PLACE ORDER</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- Checkout Section End -->
+
+ {% endblock content %}
+
+
+ {% block scripts %}
+ <script>
+ // Get references to the checkboxes and saved address section
+const addNewAddressCheckbox = document.getElementById('add-new-address');
+const showDefaultAddressCheckbox = document.getElementById('show-default-address');
+const savedAddressSection = document.getElementById('saved-address-section');
+
+// Add a click event listener to the "default delivery address" checkbox
+showDefaultAddressCheckbox.addEventListener('change', function () {
+    if (this.checked) {
+        // Show the saved address section
+        savedAddressSection.style.display = 'block';
+    } else {
+        // Hide the saved address section
+        savedAddressSection.style.display = 'none';
+    }
+});
+
+// Add a click event listener to the "Add new address" checkbox to redirect
+addNewAddressCheckbox.addEventListener('change', function () {
+    if (this.checked) {
+        // Redirect to the 'new_address' URL
+        window.location.href = "{% url 'New_address' %}";
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Get references to the checkboxes and saved address section
+    const showSavedAddressCheckbox = document.getElementById('show-default-address');
+    const savedAddressSection = document.getElementById('saved-addresses');
+    const savedAddressDetails = document.getElementById('saved-address-details');
+
+    // Add a change event listener to the "Save address" checkbox
+    showSavedAddressCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            // Show the saved address section
+            savedAddressSection.style.display = 'block';
+
+            // Fetch saved addresses from the server
+            fetch('/get_saved_addresses/')  // Update with the correct URL
+                .then(response => response.json())
+                .then(data => {
+                    // Clear existing saved address details
+                    savedAddressDetails.innerHTML = '';
+
+                    // Display saved address details
+                    displaySavedAddresses(data.savedAddresses);
+                })
+                .catch(error => {
+                    console.error('Error fetching saved addresses:', error);
+                });
+        } else {
+            // Hide the saved address section
+            savedAddressSection.style.display = 'none';
+        }
+    });
+
+    // Function to display saved address details
+    function displaySavedAddresses(addresses) {
+        savedAddressDetails.innerHTML = ''; // Clear existing details
+
+        if (addresses.length > 0) {
+            addresses.forEach(function (address) {
+                const div = document.createElement('div');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'saved-address';
+                checkbox.value = address.id;
+
+                const label = document.createElement('label');
+               
+                label.textContent = `${address.first_name} ${address.last_name}, ${address.street_address},  ${address.apartment}, ${address.city}, ${address.state}, ${address.zipcode}, Phone: ${address.phone}, Email: ${address.email}`;
+
+                label.setAttribute('for', `address-${address.id}`);
+                
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+
+                checkbox.addEventListener('change', function () {
+                    // Uncheck other checkboxes when one is selected
+                    const checkboxes = document.querySelectorAll('input[name="saved-address"]');
+                    checkboxes.forEach(function (cb) {
+                        if (cb !== checkbox) {
+                            cb.checked = false;
+                        }
+                    });
+                });
+
+                savedAddressDetails.appendChild(div);
+            });
+        } else {
+            savedAddressDetails.textContent = 'No saved addresses available.';
+        }
+    }
+});
+
+</script>
+ {% endblock scripts%}
