@@ -150,3 +150,7 @@ TWILIO_AUTH_TOKEN = '9a7ea01e148e484042aa3644cf686a9e'
 
 # Twilio Phone Number (This is the Twilio phone number you'll use to send SMS)
 TWILIO_PHONE_NUMBER = '+918075026919'
+
+
+RAZORPAY_KEY_ID = 'rzp_test_GpEnhoMBNrRgVh'
+RAZORPAY_KEY_SECRET = 'IjW2XToJMguW5isBGcUue0Uh'

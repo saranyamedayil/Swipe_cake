@@ -7,11 +7,18 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, HttpResponseRedirect, reverse
 from .models import *
 from .helpers import send_otp_phone
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponseNotAllowed
 import random
 from django.views.generic import ListView
 from decimal import Decimal
 from django.db.models import Q
+import razorpay
+from django.conf import settings
+from django.db import transaction
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
+
 
 
 
@@ -100,7 +107,7 @@ def sent_otp(request):
                     otp = random.randint(100000, 999999)
                     otp_to_ph = str(otp)
                     print(".............................", otp_to_ph)
-                    # send_otp_phone(otp_to_ph)
+                    send_otp_phone(otp_to_ph)
                     user.password = password    
                     user.save()
 
@@ -232,6 +239,7 @@ def Users_homeafter(request):
             # Add 'cart_total' to the context
             context['cart_total'] = total
             context['cart_count'] = cart_count
+            context['username'] = username
 
 
             return render(request, "home_after.html", context)  # Pass the context with 'cart_total'
@@ -311,7 +319,7 @@ def Admin_profile(request):
 
 
 
-#>>>>>>>>>>>>>>>>>>>>>>>>> user details >>>>>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>> user details  in admin side >>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 def Users_details(request):
     user={
@@ -360,7 +368,7 @@ def User_search(request):
 
     
 
-#??????????????????????????????????????  products details based codes ??????????????????????????????????
+#??????????????????????????????????????  products details based codes in admin side ??????????????????????????????????
 
 
 
@@ -813,6 +821,8 @@ def delete_from_wishlist(request, item_id):
 
 
 
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>product described page & related product >>>>>>>>>>>>>>>>>>>>>>
+
 def product_described(request,product_id):
     username=request.session.get('username')
     product = get_object_or_404(Product_Details, product_id=product_id)
@@ -847,6 +857,10 @@ def get_related_products(product_id):
     # You can further refine the criteria based on your needs (e.g., matching tags)
 
     return related_products
+
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>> checkout >>>>>>>>>>>>>>>>>>>>>>>>
 
 
 def Product_checkout(request):
@@ -975,7 +989,293 @@ def get_saved_addresses(request):
 
 
 
+def place_order(request):
+    if request.method == 'POST':
+        selected_address_details = request.POST.get('saved-address')
+        selected_payment_method = request.POST.get('payment-method')
+        username = request.session.get('username')
+
+        try:
+            user = Custom_users.objects.get(username=username)
+            address = Users_Address.objects.get(id=selected_address_details)
+
+            # Use atomic transaction to ensure consistency
+            with transaction.atomic():
+                # Create a new order instance
+                
+                unique_order_number = str(uuid.uuid4())[:8]  # Adjust the length of the order number as needed
+                new_order = Order(
+                    order_number=unique_order_number,
+                    user=user,
+                    delivery_address=address,
+                    payment_method=selected_payment_method,
+                )
+                new_order.save()
+
+                # Clear the existing cartitems associated with the user's order
+                new_order.cartitems.clear()
+
+                # Create order items and associate them with the order
+                total_amount = 0  # To calculate the total amount for Razorpay payment
+                for cart_item in CartItem.objects.filter(user=user):
+                    order_item = OrderItem(
+                        product=cart_item.product,
+                        quantity=cart_item.quantity,
+                        price=cart_item.product.product_price * cart_item.quantity,
+                        orders=new_order,  # Set the order field to the new_order instance
+                    )
+                    order_item.save()
+
+                    # Add the order_item to the new_order's cartitems
+                    new_order.cartitems.add(order_item)
+
+                    # Calculate the total amount for Razorpay payment
+                    total_amount += int(cart_item.product.product_price * cart_item.quantity * 100)
+
+                # If the selected payment method is 'OnlinePayment', initiate Razorpay payment
+                if selected_payment_method == 'OnlinePayment':
+                    # Initialize Razorpay client with your API keys
+                    razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                    razorpay_client = razorpay.Client(
+                                    auth=(
+                                        getattr(settings, 'RAZORPAY_KEY_ID', ''),
+                                        getattr(settings, 'RAZORPAY_KEY_SECRET', ''),
+                                    )
+                                )
+
+
+                    # Create a Razorpay order
+                    razorpay_order = razorpay_client.order.create({'amount': total_amount, 'currency': 'INR'})
+
+                    return render(request, 'razorpay.html', {'order': new_order, 'razorpay_order': razorpay_order})
+
+                # If the selected payment method is not 'OnlinePayment', save the order
+                new_order.save()
+
+                # Clear the user's cart after placing the order
+                CartItem.objects.filter(user=user).delete()
+
+                return render(request, 'place_order.html', {'order': new_order})
+
+        except Custom_users.DoesNotExist:
+            # Handle the case where the user does not exist
+            # You might want to redirect to an error page or handle it in another way
+            pass
+        except Users_Address.DoesNotExist:
+            # Handle the case where the address does not exist
+            # You might want to redirect to an error page or handle it in another way
+            pass
+
+    # If the request method is not POST or there are issues with the data, redirect to the checkout page
+    return redirect('Product_checkout')
+
+def place_order_success(request):
+   
+    # Get the order_id from the URL parameters
+    order_id = request.GET.get('order_id')
+
+    # Fetch the order details using the order_id
+    order = Order.objects.get(pk=order_id)  # Assuming your Order model has a primary key 'id'
+    username = request.session.get('username')
+    user = Custom_users.objects.get(username=username)
+    CartItem.objects.filter(user=user).delete()
+
+    # You can add additional logic or data fetching here if needed
+
+    return render(request, 'place_order.html', {'order': order})
 
 
 
 
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Admin order status  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+def Admin_orderstatus(request):
+    order=Order.objects.all()
+    orderitems=OrderItem.objects.all()
+    # Create a context dictionary to pass data to the template
+    context = {
+        'orders': order,
+        'order_items': orderitems,
+    }
+
+
+    return render(request,'Admin_Orderstatus.html',context)
+
+def update_order_status(request):
+    if request.method == 'POST':
+        # Loop through form data to update order statuses
+        for key, value in request.POST.items():
+            if key.startswith('order_') and key.endswith('_status'):
+                order_id = key.split('_')[1]
+                new_status = value
+                try:
+                    order = Order.objects.get(id=order_id)
+                    order.status = new_status
+                    order.save()
+                    messages.success(request, f"Order #{order.id} status updated to {new_status}.")
+                except Order.DoesNotExist:
+                    messages.error(request, f"Order with ID {order_id} not found.")
+
+        return redirect('Admin_orderstatus')  # Redirect to the order status page
+    else:
+        # Handle GET request or other cases
+        return redirect('Admin_orderstatus')  # Redirect to the order status page
+    
+
+
+
+#>>>>>>>>>>>>>>>>>>>>>>> userside view for account details >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+def view_useraccount_details(request):
+    # Default values for unauthenticated users
+    total = Decimal(0)
+    cart_count = 0
+
+    user_data = None
+    user_addresses = None
+
+    # Check if the user is authenticated
+    user = request.session.get('username')
+
+    if user:
+        user_data = get_object_or_404(Custom_users, username=user)
+        total, cart_count = calculate_cart_total(user_data)
+
+    try:
+        if user_data:
+            # Fetch all associated addresses
+            user_addresses = Users_Address.objects.filter(user=user_data)
+
+        context = {
+            'username': user_data,
+            'addresses': user_addresses,
+            'cart_total': total,
+            'cart_count': cart_count
+        }
+    except Custom_users.DoesNotExist:
+        context = {
+            'username': None,
+            'addresses': None,
+            'cart_total': total,
+            'cart_count': cart_count
+        }
+
+    return render(request, 'Useraccount_details.html', context)
+
+def delete_address(request, address_id):
+    user = request.session.get('username')
+    user_data = Custom_users.objects.get(username=user)
+       
+    # Get the address instance
+    address = get_object_or_404(Users_Address, id=address_id)
+
+    # Check if the logged-in user is the owner of the address
+    if address.user == user_data:
+        address.delete()
+
+    # Redirect back to the user account details page
+    return redirect('view_useraccount_details')
+
+
+
+def shopitems(request):
+    # Default values for unauthenticated users
+    total = Decimal(0)
+    cart_count = 0
+
+    username = request.session.get('username')
+
+    if username:
+        user = get_object_or_404(Custom_users, username=username)
+        total, cart_count = calculate_cart_total(user)
+
+    products = Product_Details.objects.all()
+
+    context = {
+        'products': products,
+        'cart_total': total,
+        'cart_count': cart_count
+    }
+
+    return render(request, 'products.html', context)
+    
+
+
+def order_details(request):
+    username = request.session.get('username')  # Assuming the user is logged in
+    user = get_object_or_404(Custom_users, username=username)
+    orders = Order.objects.filter(user=user)
+
+    context = {
+        'orders': orders,
+    }
+
+    return render(request, 'order_details.html', context)
+
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+
+    # Check if the order is cancellable (e.g., it is not already cancelled or delivered)
+    if order.status not in ['Cancelled', 'Delivered']:
+        # Update the status to 'Cancelled'
+        order.status = 'Cancelled'
+        
+        # Update the payment method to disable it (assuming you have a field for payment status)
+        order.payment_method = 'Disabled'
+
+        # Save the changes
+        order.save()
+
+   
+    return JsonResponse({'success':True})
+
+   
+
+
+def delete_orders(request):
+    # Get orders with the status "cancelled"
+    cancelled_orders = Order.objects.filter(status='Cancelled')
+
+    # Pass the cancelled orders to the template
+    context = {'cancelled_orders': cancelled_orders}
+    
+
+    return render(request, "Delete_orders.html",context)
+
+
+def edit_address(request, address_id):
+    # Assuming you have the address_id from the request or other means
+    address = get_object_or_404(Users_Address, id=address_id)
+
+    if request.method == 'POST':
+        # Update the address fields based on the form data
+        address.first_name = request.POST.get('first_name', address.first_name)
+        address.last_name = request.POST.get('last_name', address.last_name)
+        address.country = request.POST.get('country', address.country)
+        address.street_address = request.POST.get('street_address', address.street_address)
+        address.apartment = request.POST.get('apartment', address.apartment)
+        address.city = request.POST.get('city', address.city)
+        address.state = request.POST.get('state', address.state)
+        address.zipcode = request.POST.get('zipcode', address.zipcode)
+        address.phone = request.POST.get('phone', address.phone)
+        address.email = request.POST.get('email', address.email)
+
+        # Save the changes
+        address.save()
+
+        # Redirect to a page or render a template
+        return redirect('view_useraccount_details')  # Replace with your desired URL
+
+    # Render the form with the existing address data
+    context = {
+        'address': address,
+    }
+    return render(request, 'edit_address.html', context)
+
+
+
+
+  

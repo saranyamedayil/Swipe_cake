@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Payment</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+{% comment %} <h1>Razorpay Payment</h1> {% endcomment %}
+
+<form id="razorpay-payment-form">
+    <!-- Additional form fields if needed -->
+    <input type="hidden" name="order_id" value="{{ razorpay_order.id }}">
+    <input type="hidden" name="amount" value="{{ razorpay_order.amount }}">
+    <input type="hidden" name="currency" value="INR">
+    <!-- End of additional form fields -->
+
+    <script>
+        var options = {
+            "key": "{{ settings.RAZORPAY_KEY_ID }}",
+            "amount": "{{ razorpay_order.amount }}",
+            "currency": "INR",
+            "name": "swipe cake",
+            "description": "Payment for Order #{{ order.id }}",
+            "order_id": "{{ razorpay_order.id }}",
+            "handler": function (response) {
+                // Handle the success response, you can redirect to a success page
+                console.log(response);
+
+                // You can submit the form after handling the response
+                document.forms['razorpay-payment-form'].submit();
+                window.location.href = "/place_order_success/?order_id={{ order.id }}";
+            },
+            
+            "prefill": {
+                "name": "{{ order.user.first_name }} {{ order.user.last_name }}",
+                "email": "{{ order.user.email }}",
+                "contact": "{{ order.user.phone_number }}"
+            },
+            "notes": {
+                "address": "{{ order.delivery_address }}"
+            },
+            "theme": {
+                "color": "#f5a607"
+            }
+        };
+
+        var rzp = new Razorpay(options);
+
+        // Function to handle closure of Razorpay payment window
+        window.addEventListener('popstate', function () {
+            // Razorpay payment window closed
+            console.log('Razorpay window closed');
+
+            // You can redirect to a URL to handle closure on the server side
+            //window.location.href = "/handle_razorpay_closure/?order_id={{ order.id }}";
+        });
+
+        rzp.open();
+    </script>
+</form>
+
+</body>
+</html>

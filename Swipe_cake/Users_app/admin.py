@@ -22,10 +22,18 @@ class CustomUserAdmin(admin.ModelAdmin):
     actions = [block_users, unblock_users]
 
 
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id','user', 'order_date', 'status')
+    list_filter = ('status',)
+
+
 admin.site.register(Product_Details)
 admin.site.register(Product_Category)
 admin.site.register(CartItem)
 admin.site.register(WishlistItem)
 admin.site.register(Users_Address)
+admin.site.register(OrderItem)
+
 
 

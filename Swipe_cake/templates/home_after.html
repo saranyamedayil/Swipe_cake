@@ -113,20 +113,7 @@
                         <div class="header__top__left">
                             <h3 style="color: orange; font-weight: bold;">SWIPE_CAKE</h3>
                             <ul>
-                                {% comment %} <li>USD <span class="arrow_carrot-down"></span>
-                                    <ul>
-                                        <li>EUR</li>
-                                        <li>USD</li>
-                                    </ul>
-                                </li>
-                                <li>ENG <span class="arrow_carrot-down"></span>
-                                    <ul>
-                                        <li>Spanish</li>
-                                        <li>ENG</li>
-                                    </ul>
-                                </li> {% endcomment %}
-                                {% comment %} <li><a href="#">Sign in</a> </li>
-                                <li> <a href="#">log in</a></li> {% endcomment %}
+                              
                             </ul>
                         </div>
 
@@ -150,9 +137,11 @@
                           
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                          <li><a class="dropdown-item" href="#">Action</a></li>
-                          <li><a class="dropdown-item" href="#">Another action</a></li>
-                          <li><a class="dropdown-item" href="#">Something else here</a></li>
+                          <li><a class="dropdown-item" href="#">{{ username }}</a></li>
+                          <li><a class="dropdown-item" href="{% url 'view_useraccount_details' %}">Account details</a></li>
+                          <li><a class="dropdown-item" href="{% url 'order_details' %}">My orders</a></li>
+                          <li><a class="dropdown-item" href="{% url 'View_userswishlist' %}">My wishlist</a></li>
+                          <li><a class="dropdown-item" href="#">Track orders</a></li>
                         </ul>
                       </div>
                     
@@ -178,12 +167,12 @@
                     <ul>
                         <li class="active"><a href="{% url 'homeafter' %}">Home</a></li>
                         <li><a href="{% url 'about' %}">About</a></li>
-                        <li><a href="./shop.html">Shop</a></li>
+                        <li><a href="{% url 'shopitems' %}">Shop</a></li>
                         <li><a href="#">Pages</a>
                             <ul class="dropdown">
                                 <li><a href="./shop-details.html">Shop Details</a></li>
                                 <li><a href="{% url 'view_cart' %}">Shoping Cart</a></li>
-                                <li><a href="./checkout.html">Check Out</a></li>
+                                <li><a href="{% url 'Product_checkout' %}">Check Out</a></li>
                                 <li><a href="{% url 'View_userswishlist' %}">Wisslist</a></li>
                                 {% comment %} <li><a href="./Class.html">Class</a></li>
                                 <li><a href="./blog-details.html">Blog Details</a></li> {% endcomment %}

@@ -1,0 +1,118 @@
+
+
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|home {% endblock %}
+{% block content %}
+
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row ">
+            <div class="col-12 grid-margin">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Order Status</h4>
+                        <form method="post" action="{% url 'update_order_status' %}" id="orderStatusForm">
+                            {% csrf_token %}
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div class="form-check form-check-muted m-0">
+                                                    <label class="form-check-label">
+                                                        <input type="checkbox" class="form-check-input">
+                                                    </label>
+                                                </div>
+                                            </th>
+                                            <th> User Name </th>
+                                            <th> Order No </th>
+                                            <th> Product name </th>
+                                            <th> Product Cost </th>
+                                            <th> User Address </th>
+                                            <th> Payment Mode </th>
+                                            <th> Ordered Date </th>
+                                            <th> Order Status </th>
+                                            {% comment %} <th> Change Status </th> {% endcomment %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in orders %}
+                                            <tr>
+                                                <td>
+                                                    <div class="form-check form-check-muted m-0">
+                                                        <label class="form-check-label">
+                                                            <input type="checkbox" class="form-check-input">
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <img src="{% static 'assets/images/faces/face1.jpg' %}" alt="image" />
+                                                    <span class="pl-2">{{ order.user.username }}</span>
+                                                </td>
+                                                <td>{{ order.order_number }}</td>
+                                                <td>
+                                                    {% for order_item in order.orderitems.all %}
+                                                        {{ order_item.product.product_name }}<br>
+                                                    {% endfor %}
+                                                </td>
+                                                <td>
+                                                    {% for order_item in order.orderitems.all %}
+                                                        {{ order_item.price }}<br>
+                                                    {% endfor %}
+                                                </td>
+                                                <td>{{ order.delivery_address }}</td>
+                                                <td>{{ order.payment_method }}</td>
+                                                <td>{{ order.order_date }}</td>
+                                              
+                                                <td>
+                                                    <div class="badge">
+                                                        <select name="order_{{ order.id }}_status" class="form-control text-white" onchange="updateOrderStatus(this)">
+                                                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                                            <option value="Confirm" {% if order.status == 'Confirm' %}selected{% endif %}>Confirm</option>
+                                                            <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                                                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                                                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                                                            <option value="Cancel" {% if order.status == 'Cancel' %}selected{% endif %}>Cancelled</option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                
+                                                
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block script %}
+<script>
+    function updateOrderStatus(selectElement) {
+        // Find the form element
+        var form = document.getElementById('orderStatusForm');
+        // Submit the form
+        form.submit();
+    }
+
+    {% for msg in messages %}
+    Swal.fire({
+        title: 'success',
+        text: '{{ msg }}',
+        icon: 'success'
+    });
+    
+
+   
+    {% endfor %}
+</script>
+{% endblock script %}
+

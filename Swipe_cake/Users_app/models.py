@@ -1,4 +1,6 @@
 from django.db import models
+import uuid 
+
 
 # Create your models here.
 # .....................................Signin user details....................................
@@ -109,3 +111,60 @@ class Users_Address(models.Model):
     def __str__(self):
         return f"{self.user} - {self.first_name} {self.last_name}"
     
+    
+    
+
+
+
+
+class Order(models.Model):
+    PAYMENT_METHOD_CHOICES = [
+        ('CashOnDelivery', 'Cash On Delivery'),
+        ('OnlinePayment', 'Online Payment'),
+    ]
+
+    user = models.ForeignKey(Custom_users, on_delete=models.CASCADE)
+    order_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, choices=[('Pending', 'Pending'),('Confirm', 'Confirm'), ('Processing', 'Processing'),
+                                                       ('Shipped', 'Shipped'), ('Delivered', 'Delivered'),('Cancelled', 'Cancelled')], default='Pending')
+    delivery_address = models.ForeignKey(Users_Address, on_delete=models.CASCADE)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)  # Payment method field
+    cartitems = models.ManyToManyField('OrderItem', blank=True)
+    order_number = models.CharField(max_length=100, unique=True,default='000000')
+  
+
+
+    def __str__(self):
+        return f"Order #{self.pk} - {self.user.username}"
+
+
+class OrderItem(models.Model):
+    product =  models.ForeignKey(Product_Details, on_delete=models.CASCADE,null=True)
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    orders = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='orderitems',default=1)
+    unique_order_number = models.CharField(max_length=255,default='0000')  # Add this field to store the unique order number for the product
+
+    def __str__(self):
+        # Check if the product attribute is not None before accessing its properties
+        if self.product:
+            return f"{self.product.product_name} {self.quantity} {self.price}"
+        else:
+            return f"OrderItem {self.product} (No Product)"
+        
+    def get_product_image_url(self):
+        if self.product and self.product.product_image:
+            return self.product.product_image.url
+    # If either self.product or self.product.product_image is None, return a default URL or handle it accordingly
+        return '/static/default_product_image.jpg'
+
+
+    
+    def save(self, *args, **kwargs):
+        # Set the default value for orders as the current user's order
+        self.price = self.product.product_price * self.quantity
+        current_order = Order.objects.filter(user=self.orders.user).last()
+        self.orders = current_order
+        super().save(*args, **kwargs)
+
+

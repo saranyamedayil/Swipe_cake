@@ -28,8 +28,8 @@
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-          <a class="sidebar-brand brand-logo" href="">A D M I N PANEL</a>
-          <a class="sidebar-brand brand-logo-mini" href="">A D M I N PANEL</a>
+          {% comment %} <a class="sidebar-brand brand-logo" href=""></a>
+          <a class="sidebar-brand brand-logo-mini" href="">A D M I N PANEL</a> {% endcomment %}
         </div>
         <ul class="nav">
           <li class="nav-item profile">
@@ -133,11 +133,11 @@
             </div>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="pages/forms/basic_elements.html">
+            <a class="nav-link" href="{% url 'Admin_orderstatus' %}">
               <span class="menu-icon">
                 <i class="mdi mdi-playlist-play"></i>
               </span>
-              <span class="menu-title">Form Elements</span>
+              <span class="menu-title">Order status</span>
             </a>
           </li>
           

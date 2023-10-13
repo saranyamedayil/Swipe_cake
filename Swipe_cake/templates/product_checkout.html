@@ -4,6 +4,20 @@
 {% load custom_filters %}
 {% block title %}Swipe_cake|Chocolates {% endblock %}
 {% block content %}
+
+<style>
+    .checkout__total__products {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .total-price {
+        margin-left: auto; /* This will push it to the right */
+    }
+
+
+</style>
+
 <!-- Page Preloder -->
 <div id="preloder">
     <div class="loader"></div>
@@ -188,16 +202,10 @@
     <section class="checkout spad">
         <div class="container">
             <div class="checkout__form">
-                <form action="#">
+                <form action="{% url 'place_order' %}" method='POST'>
+                    {% csrf_token %}
                     <div class="row">
-                        <div class="col-lg-8<div class="col-lg-4">
-                            <div class="cart__discount">
-                                <h6>Discount codes</h6>
-                                <form action="#">
-                                    <input type="text" placeholder="Coupon code">
-                                    <button type="submit">Apply</button>
-                                </form>
-                            </div> col-md-6">
+                        <div class="col-lg-8 col-md-6">
                             
                             <h6 class="checkout__title">Billing Details</h6>
                            <div class="checkout__input__checkbox">
@@ -207,6 +215,7 @@
                                 <span class="checkmark"><a href="{% url 'New_address' %}"></a></span>
                             </label>
                         </div>
+                        
                         
                         <div class="checkout__input__checkbox">
                             <input type="checkbox" id="show-default-address">
@@ -242,40 +251,52 @@
                                 
                                 <h6 class="order__title">Your order</h6>
                                 <div class="checkout__order__products">Product <span>Total</span></div>
-                                <ul class="checkout__total__products">
-                                    {% for category, subtotal in subtotal_dict.items %}
+                                {% comment %} {% for subtotal in subtotal_dict.items %} {% endcomment %}
+                               
                                     {% for item in cart_items %}
-                                        <samp>{{forloop.counter}}</samp>
+                                       
+                                
+                                            <ul class="checkout__total__products">  
+                                  
+                                            <samp>{{forloop.counter}}</samp>
                                             
-                                          <samp style="margin-left: 1vw"> 
-                                            {{item.product.product_name}} {{item.product.product_price}} * {{item.quantity}}</samp>  <span style="margin-left: 3vw">₹{{ item.product.product_price|mul:item.quantity }}</span>
+                                                <samp style="margin-left: 1vw"> 
+                                                    {{item.product.product_name}} -{{item.quantity}}</samp>  
+                                                    <span class="total-price">₹{{ item.product.product_price|mul:item.quantity }}</span>
                                             
-                                    
-                                </ul>
-                                {% endfor %}
-                                <ul class="checkout__total__all">
-                                    <li>Subtotal <span>₹{{ subtotal }}</span></li>
-                                    <li>Total <span>₹{{cart_total}}</span></li>
-                                </ul>
+                                            
+                                                    </ul> 
+                                        
+                              
+                                    {% endfor %}
+                                
+                                        <ul class="checkout__total__all">
+                                            
+                                        <li >Subtotal <span>₹{{ cart_total }}</span></li>
+                                            <li>Total <span>₹{{cart_total}}</span></li>
+                                            </ul>
                                
-                                {% endfor %}
+                                {% comment %} {% endfor %}
+                             {% endcomment %}
+                        
                                
-                                <div class="checkout__input__checkbox">
-                                    <label for="payment">
-                                        cash on delivery
-                                        <input type="checkbox" id="payment">
+                                <div class="checkout__input__radio">
+                                    <label for="payment-cod">
+                                        
+                                        <input type="radio" id="payment-cod" name="payment-method" value="CashOnDelivery">Cash on Delivery
                                         <span class="checkmark"></span>
                                     </label>
                                 </div>
-                                <div class="checkout__input__checkbox">
-                                    <label for="paypal">
-                                        online payment
-                                        <input type="checkbox" id="paypal">
+                                <div class="checkout__input__radio">
+                                    <label for="payment-online">
+                                       
+                                        <input type="radio" id="payment-online" name="payment-method" value="OnlinePayment"> Online Payment
                                         <span class="checkmark"></span>
                                     </label>
                                 </div>
-                                <button type="submit" class="site-btn">PLACE ORDER</button>
-                            </div>
+                                
+                                <button type="submit" class="site-btn" id='place-order-btn'>PLACE ORDER</button>
+                             
                         </div>
                     </div>
                 </form>
@@ -313,7 +334,7 @@ addNewAddressCheckbox.addEventListener('change', function () {
     }
 });
 
-document.addEventListener('DOMContentLoaded', function () {
+{% comment %} document.addEventListener('DOMContentLoaded', function () {
     // Get references to the checkboxes and saved address section
     const showSavedAddressCheckbox = document.getElementById('show-default-address');
     const savedAddressSection = document.getElementById('saved-addresses');
@@ -343,6 +364,8 @@ document.addEventListener('DOMContentLoaded', function () {
             savedAddressSection.style.display = 'none';
         }
     });
+
+    
 
     // Function to display saved address details
     function displaySavedAddresses(addresses) {
@@ -382,7 +405,140 @@ document.addEventListener('DOMContentLoaded', function () {
             savedAddressDetails.textContent = 'No saved addresses available.';
         }
     }
+}); {% endcomment %}
+document.addEventListener('DOMContentLoaded', function () {
+    // Get references to the checkboxes and saved address section
+    const showSavedAddressCheckbox = document.getElementById('show-default-address');
+    const savedAddressSection = document.getElementById('saved-addresses');
+    const savedAddressDetails = document.getElementById('saved-address-details');
+    const placeOrderButton = document.getElementById('place-order-btn');
+    
+
+
+    // Add a change event listener to the "Save address" checkbox
+    showSavedAddressCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            // Show the saved address section
+            savedAddressSection.style.display = 'block';
+
+            // Fetch saved addresses from the server
+            fetch('/get_saved_addresses/')  // Update with the correct URL
+                .then(response => response.json())
+                .then(data => {
+                    // Clear existing saved address details
+                    savedAddressDetails.innerHTML = '';
+
+                    // Display saved address details
+                    displaySavedAddresses(data.savedAddresses);
+                })
+                .catch(error => {
+                    console.error('Error fetching saved addresses:', error);
+                });
+        } else {
+            // Hide the saved address section
+            savedAddressSection.style.display = 'none';
+        }
+    });
+
+    // Add a click event listener to the "Place Order" button
+    placeOrderButton.addEventListener('click', function () {
+        // Check if a saved address is selected
+        const selectedAddressCheckbox = document.querySelector('input[name="saved-address"]:checked');
+
+        if (selectedAddressCheckbox) {
+            const selectedAddressId = selectedAddressCheckbox.value;
+            
+
+            // Fetch the details of the selected address
+            const selectedAddressDetails = getAddressDetailsById(selectedAddressId);
+
+            // Now you can use the selectedAddressDetails to place the order
+            placeOrder(selectedAddressDetails);
+        } else {
+            alert('Please select a saved address before placing the order.');
+        }
+    });
+
+    // Function to display saved address details
+    function displaySavedAddresses(addresses) {
+        savedAddressDetails.innerHTML = ''; // Clear existing details
+
+        if (addresses.length > 0) {
+            addresses.forEach(function (address) {
+                const div = document.createElement('div');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'saved-address';
+                checkbox.value = address.id;
+
+                const label = document.createElement('label');
+
+                label.textContent = `${address.first_name} ${address.last_name}, ${address.street_address},  ${address.apartment}, ${address.city}, ${address.state}, ${address.zipcode}, Phone: ${address.phone}, Email: ${address.email}`;
+
+                label.setAttribute('for', `address-${address.id}`);
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+
+                checkbox.addEventListener('change', function () {
+                    // Uncheck other checkboxes when one is selected
+                    const checkboxes = document.querySelectorAll('input[name="saved-address"]');
+                    checkboxes.forEach(function (cb) {
+                        if (cb !== checkbox) {
+                            cb.checked = false;
+                        }
+                    });
+                });
+
+                savedAddressDetails.appendChild(div);
+            });
+        } else {
+            savedAddressDetails.textContent = 'No saved addresses available.';
+        }
+    }
+
+    // Function to retrieve address details by ID
+    function getAddressDetailsById(addressId) {
+        // Replace this with your logic to fetch details from the server
+        // You may already have this data if you fetched it earlier
+        // For demonstration purposes, I assume you have an array named 'data.savedAddresses'
+        const addresses = data.savedAddresses;
+        const selectedAddress = addresses.find(address => address.id === addressId);
+
+        return selectedAddress;
+    }
+
+     // Add a click event listener to the "Place Order" button
+    placeOrderButton.addEventListener('click', function () {
+        // Check if a saved address is selected
+        const selectedAddressCheckbox = document.querySelector('input[name="saved-address"]:checked');
+        const selectedPaymentRadio = document.querySelector('input[name="payment-method"]:checked');
+      
+        if (!selectedAddressCheckbox) {
+            alert('Please select a saved address before placing the order.');
+        } else if (!selectedPaymentRadio) {
+            alert('Please select a payment method.');
+        } else {
+            const selectedAddressId = selectedAddressCheckbox.value;
+            const selectedAddressDetails = getAddressDetailsById(selectedAddressId);
+            const selectedPaymentMethod = selectedPaymentRadio.value;
+            console.log(selectedAddressId)
+            console.log(selectedAddressDetails)
+            console.log(selectedPaymentMethod)
+            placeOrder(selectedAddressDetails, selectedPaymentMethod);
+        }
+    });
+
+    // Function to place the order with the selected address
+    function placeOrder(selectedAddressDetails,selectedPaymentMethod) {
+        // Replace this with your logic to place the order using the selected address
+        // You can use selectedAddressDetails to get the necessary information
+        console.log('Placing order with the following address:', selectedAddressDetails);
+        console.log('Placing order with the following address:', selectedPaymentMethod)
+        // Add your order placement logic here
+    }
 });
+
 
 </script>
  {% endblock scripts%}

@@ -1,0 +1,333 @@
+{% extends 'index.html' %} 
+{% load static %}
+{% load custom_filters %}
+{% block title %}Swipe_cake|Chocolates {% endblock %}
+{% block content %}
+
+<style>
+    /* Style the plus symbol to look like a button */
+    .increase {
+        cursor: pointer;
+       
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+    .decrease {
+        cursor: pointer;
+       
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    /* Style the input box */
+    .value {
+        border: none;
+        text-align: center;
+        width: 30px;
+    }
+
+
+   
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+    
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+    
+        th {
+            background-color: #f2f2f2;
+        }
+   
+</style>
+
+<!-- Page Preloder -->
+<div id="preloder">
+    <div class="loader"></div>
+</div>
+
+<!-- Offcanvas Menu Begin -->
+<div class="offcanvas-menu-overlay"></div>
+<div class="offcanvas-menu-wrapper">
+    <div class="offcanvas__cart">
+        <div class="offcanvas__cart__links">
+            <a href="#" class="search-switch"><img src="{% static '/img/icon/search.png' %}" alt=""></a>
+            <a href="#"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
+        </div>
+        <div class="offcanvas__cart__item">
+            <a href="#"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>0</span></a>
+            <div class="cart__price">Cart: <span>$0.00</span></div>
+        </div>
+    </div>
+    <div class="offcanvas__logo">
+        <a href="./index.html"><img src="{% static '/img/logo.png' %}" alt=""></a>
+    </div>
+    <div id="mobile-menu-wrap"></div>
+    <div class="offcanvas__option">
+        {% comment %} <ul>
+            <li>USD <span class="arrow_carrot-down"></span>
+                <ul>
+                    <li>EUR</li>
+                    <li>USD</li>
+                </ul>
+            </li>
+            <li>ENG <span class="arrow_carrot-down"></span>
+                <ul>
+                    <li>Spanish</li>
+                    <li>ENG</li>
+                </ul>
+            </li> {% endcomment %}
+            <li><a href="#">Sign in</a> <span class="arrow_carrot-down"></span></li>
+        </ul>
+    </div>
+</div>
+<!-- Offcanvas Menu End -->
+
+<!-- Header Section Begin -->
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header__top__inner">
+                        <div class="header__top__left">
+                            <h3 style="color: orange; font-weight: bold;">SWIPE_CAKE</h3>
+                            <ul>
+                                {% comment %} <li>USD <span class="arrow_carrot-down"></span>
+                                    <ul>
+                                        <li>EUR</li>
+                                        <li>USD</li>
+                                    </ul>
+                                </li>
+                                <li>ENG <span class="arrow_carrot-down"></span>
+                                    <ul>
+                                        <li>Spanish</li>
+                                        <li>ENG</li>
+                                    </ul>
+                                </li> {% endcomment %}
+                                {% comment %} <li><a href="#">Sign in</a> </li>
+                                <li> <a href="#">log in</a></li> {% endcomment %}
+                            </ul>
+                        </div>
+                        <div class="header__logo">
+                            <a href="./index.html"><img src="{% static '/img/logo.png' %}" alt=""></a>
+                        </div>
+                        <div class="header__top__right">
+                            <div class="header__top__right__links">
+                                <a href="#" class="search-switch"><img src="{% static '/img/icon/search.png' %}" alt=""></a>
+                                <a href="{% url 'View_userswishlist' %}"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
+                            </div>
+                            <div class="header__top__right__cart">
+                                <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_count}}</span></a>
+                                <div class="cart__price">Cart: <span>{{ cart_total }}</span></div></div>
+                                <div class="header__top__right__cart" style="margin-left: 2vw">
+                                    <a href="#"><img src="{% static '/img/user-icon.png' %}" alt=""></a>
+                                    </div>
+                                
+                               
+                                {% comment %} <div class="btn btn-success">logout</div> {% endcomment %}
+{% comment %} 
+                                <div><img src="{% static '/img/user-icon.png' %}" alt=""></div>      {% endcomment %}
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas__open"><i class="fa fa-bars"></i></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a href="{% url 'homeafter' %}">Home</a></li>
+                        <li><a href="{% url 'about' %}">About</a></li>
+                        <li><a href="./shop.html">Shop</a></li>
+                        <li class="active"><a href="#">Pages</a>
+                            <ul class="dropdown">
+                                <li><a href="./shop-details.html">Shop Details</a></li>
+                                <li><a href="{% url 'view_cart' %}">Shoping Cart</a></li>
+                                <li><a href="./checkout.html">Check Out</a></li>
+                                <li><a href="{% url 'View_userswishlist' %}">Wisslist</a></li>
+                                {% comment %} <li><a href="./Class.html">Class</a></li>
+                                <li><a href="./blog-details.html">Blog Details</a></li> {% endcomment %}
+                            </ul>
+                        </li>
+                        <li><a href="#">Registration</a>
+                            <ul class="dropdown">
+                                <li><a href="./shop-details.html">Online Class</a></li>
+                                <li><a href="./shoping-cart.html">Offline Class</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{% url 'about' %}">Contact</a></li>
+                        {% comment %} {% comment %} <li><a href="./blog.html">login</a></li> {% endcomment %}
+                        <li><a href="{% url 'logout' %}">logout</a></li> 
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Header Section End -->
+
+
+
+    <!-- Breadcrumb Begin -->
+    <div class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="breadcrumb__text">
+                        <h2> Cancelled Order Details</h2>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="breadcrumb__links">
+                        <a href="{% url 'homeafter' %}">Home</a>
+                        <span> Deleted Order Details</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Breadcrumb End -->
+<!-- Shopping Cart Section Begin -->
+{% comment %} <section class="shopping-cart spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="shopping__cart__table">
+                    {% if deleted_orders %}
+                    <table border="1">
+                        <tr>
+                            <th style="width: 60px;">Order Number</th>
+                            <th style="width: 100px;">Product Images</th>
+                            <th style="width: 120px;">Order Items</th>
+                            <th style="width: 100px;">Order Date</th>
+                            <th style="width: 100px;">Payment Method</th>
+                            <th style="width: 100px;">Status</th>
+                            <!-- Add more columns as needed -->
+                        </tr>
+                        {% for deleted_order in deleted_orders %}
+                            <tr>
+                                <td>{{ deleted_order.order_number }}</td>
+                                <td>
+                                    {% for product_image in deleted_order.get_product_image_url %}
+                                        <img src="{{ product_image }}" alt="Product Image" style="max-width: 100px; max-height: 100px;">
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for order_item in deleted_order.cartitems.all %}
+                                    
+                                        <p><strong>Product:</strong> {{ order_item.product.product_name }}</p>
+                                        <p><strong>Quantity:</strong> {{ order_item.quantity }}</p>
+                                        <p><strong>Price:</strong> {{ order_item.price }}</p>
+                                        <p><strong>Order No:</strong> {{ deleted_order.order_number }}</p>
+                                    {% endfor %}
+                                </td>
+                                <td>{{ deleted_order.deleted_at }}</td>
+                                <td>{{ deleted_order.payment_method }}</td>
+                                <td class='text text-danger'>CANCELLED</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <p>No deleted orders available.</p>
+                {% endif %}
+                
+                
+                </div>
+              
+              
+                
+            </div>
+        </div>
+    </div>
+</section> {% endcomment %}
+<!-- Shopping Cart Section End -->
+<!-- Delete_orders.html -->
+
+<section class="shopping-cart spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="shopping__cart__table">
+       
+        {% if cancelled_orders %}
+           
+                <table border="1">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>User</th>
+                        <th>Order Date</th>
+                        <th>Status</th>
+                        <th>Delivery Address</th>
+                       
+                        <th>Product Names</th>
+                        <!-- Add other columns as needed -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cancelled_order in cancelled_orders %}
+                        <tr>
+                            <td>{{ cancelled_order.order_number }}</td>
+                            <td>{{ cancelled_order.user.username }}</td>
+                            <td>{{ cancelled_order.order_date }}</td>
+                            <td>{{ cancelled_order.status }}</td>
+                            {% comment %} <td>{{ cancelled_order.delivery_address }}</td> {% endcomment %}
+                            <td>
+                                {{ cancelled_order.delivery_address.first_name }} {{ cancelled_order.delivery_address.last_name }} <br>
+                                {{ cancelled_order.delivery_address.street_address }}{% if cancelled_order.delivery_address.apartment %}, {{ cancelled_order.delivery_address.apartment }}{% endif %} <br>
+                                {{ cancelled_order.delivery_address.city }}, <br>{{ cancelled_order.delivery_address.state }} - {{ cancelled_order.delivery_address.zipcode }}</p>
+                                Phone Number:{{ cancelled_order.delivery_address.phone }} <br>
+                                Email:{{ cancelled_order.delivery_address.email }}
+                            </td>
+
+                          
+                            {% comment %} <td>
+                                {% for order_item in cancelled_order.orderitems.all %}
+                                    {{ order_item.product.product_name }} - Quantity: {{ order_item.quantity }},
+                                {% endfor %}
+                            </td> {% endcomment %}
+                            <td>
+                                {% for order_item in cancelled_order.orderitems.all %}
+                                    <div class="product-details">
+                                        <img src="{{ order_item.get_product_image_url }}" alt="{{ order_item.product.product_name }}" width="50" height="50">
+                                        <p><strong>Product Name:</strong> {{ order_item.product.product_name }}</p>
+                                        <p><strong>Quantity:</strong> {{ order_item.quantity }}</p>
+                                        <p><strong>Price:</strong> {{ order_item.price }}</p>
+                                    </div>
+                                {% endfor %}
+                            </td>
+
+                         
+
+                            <!-- Add other columns as needed -->
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No cancelled orders found.</p>
+        {% endif %}
+        /<div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+    
+
+{% endblock content %}
+
+

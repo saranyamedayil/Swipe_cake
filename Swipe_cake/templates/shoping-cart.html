@@ -274,8 +274,7 @@
             <li style="text-align: right; width: 50%; float: right;">₹{{ cart_total }}</li>
         </ul>                                                               
                     </ul>
-                    <a href="{% url 'Product_checkout' %}" class="primary-btn" style="clear: both;">Proceed to checkout</a>
-                </div>
+                    <a href="{% url 'Product_checkout' %}" class="primary-btn {% if not cart_items %}disabled{% endif %}" id="proceed-to-checkout" style="clear: both;">Proceed to checkout</a>
                 
             </div>
         </div>
@@ -302,6 +301,17 @@
    
     {% endfor %}
 
+    document.getElementById('proceed-to-checkout').addEventListener('click', function (event) {
+        if (this.classList.contains('disabled')) {
+            event.preventDefault();  // Prevent the link from being followed
+            //alert('Your cart is empty. Add items to proceed.');  // Optionally, display a message
+            Swal.fire({
+                icon: 'warning',
+                title: 'Your cart is empty',
+                text: 'Add items to proceed.',
+            });
+        }
+    });
 
 
 // Wait for the document to be ready
@@ -363,8 +373,45 @@ $(document).ready(function () {
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 });
+$(document).ready(function () {
+    // Your existing code...
 
+    // Function to check product availability
+    function checkProductAvailability() {
+        let isAvailable = true;
 
+        // Iterate through each row in the table
+        $('.quantity__item').each(function () {
+            // Get the item quantity
+            const quantity = parseInt($(this).find('.value').val());
+
+            // Check if the quantity is greater than 0
+            if (quantity <= 0) {
+                isAvailable = false;
+                return false; // Exit the loop early
+            }
+        });
+
+        return isAvailable;
+    }
+
+    // Add click event for the "Proceed to checkout" button
+    $('.proceed-to-checkout').click(function (event) {
+        event.preventDefault(); // Prevent the default action
+
+        // Check product availability before proceeding
+        if (checkProductAvailability()) {
+            // Proceed to checkout
+            window.location.href = $(this).attr('href');
+        } else {
+            // Show alert for out-of-stock products
+            alert('One or more products are out of stock. Please update quantities.');
+        }
+    });
+
+    // Wait for the document to be ready
+    // ... (rest of your existing code)
+});
 
 </script>
 

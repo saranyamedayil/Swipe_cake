@@ -30,8 +30,17 @@ urlpatterns = [
     path('Saved_address',views.Saved_address,name='Saved_address'),
     path('save_address',views.save_address,name='save_address'),
     path('get_saved_addresses/',views.get_saved_addresses,name='get_saved_addresses'),
+    path('place_order',views.place_order,name='place_order'),
+    path('place_order_success/', views.place_order_success, name='place_order_success'),
+    path('view_useraccount_details',views.view_useraccount_details,name='view_useraccount_details'),
+    path('delete_address/<int:address_id>/', views.delete_address, name='delete_address'),
+    path('shopitems',views.shopitems,name='shopitems'),
+    path('order_details/',views.order_details,name='order_details'),
+    # path('delete_order/<int:order_id>/',views.delete_order, name='delete_order'),
+    path('edit_address/<int:address_id>/',views.edit_address,name='edit_address'),
+    path('delete_orders/', views.delete_orders, name='delete_orders'),
+    path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
 
-    
 
 
 
@@ -54,7 +63,9 @@ urlpatterns = [
     path('Categoryupdate/<int:category_id>/',views.Category_update,name='categoryupdate'),
     path('Do_Category_update/<int:category_id>/Do_Category_update/',views.Do_Category_update,name='DoCategory_update'),
     path('Category_delete/<int:category_id>/',views.Category_delete,name='Category_delete'),
-   
+    path('Admin_orderstatus',views.Admin_orderstatus,name='Admin_orderstatus'),
+    path('update_order_status/',views.update_order_status, name='update_order_status'),
+    
 
 
 

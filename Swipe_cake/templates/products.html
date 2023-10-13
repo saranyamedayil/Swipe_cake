@@ -1,0 +1,239 @@
+{% extends 'index.html' %} 
+{% load static %}
+{% block title %}Swipe_cake|Chocolates {% endblock %}
+{% block content %}
+
+<style>
+    .product__item__pic {
+    position: relative;
+    /* Add other styles for the image container as needed */
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Semi-transparent background color */
+    opacity: 0; /* Initially hidden */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease; /* Smooth transition effect */
+}
+
+.view-button {
+    text-decoration: none;
+    padding: 10px 20px;
+    background-color: #e67b02;
+    color: #fff;
+    border-radius: 5px;
+    transition: background-color 0.3s ease; /* Smooth button background color change */
+}
+
+.product__item__pic:hover .overlay {
+    opacity: 1; /* Show the overlay on hover */
+}
+
+.product__item__pic:hover .view-button {
+    background-color: #fcb103; /* Change button background color on hover */
+}
+
+
+    .icon-background {
+        display: inline-block;
+        background-color: ; /* Your background color here */
+        padding: 15px; /* Adjust padding as needed */
+        border-radius: 50%; /* Optional: Add rounded corners */
+    }
+
+    /* You can adjust the icon color if needed */
+    .icon_heart_alt {
+        color: #fff; /* Your icon color here */
+        font-size: 35px; 
+    }
+
+
+
+</style>
+<!-- Page Preloder -->
+<div id="preloder">
+  <div class="loader"></div>
+</div>
+
+<!-- Offcanvas Menu Begin -->
+<div class="offcanvas-menu-overlay"></div>
+<div class="offcanvas-menu-wrapper">
+  <div class="offcanvas__cart">
+      <div class="offcanvas__cart__links">
+          <a href="#" class="search-switch"><img src="{% static '/img/icon/search.png' %}" alt=""></a>
+          <a href="#"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
+      </div>
+      <div class="offcanvas__cart__item">
+          <a href="#"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>0</span></a>
+          <div class="cart__price">Cart: <span>Rs.{{ cart_total }}</span></div>
+      </div>
+  </div>
+  <div class="offcanvas__logo">
+      <a href="./index.html"><img src="{% static '/img/logo.png' %}" alt=""></a>
+  </div>
+  <div id="mobile-menu-wrap"></div>
+  <div class="offcanvas__option">
+      {% comment %} <ul>
+          <li>USD <span class="arrow_carrot-down"></span>
+              <ul>
+                  <li>EUR</li>
+                  <li>USD</li>
+              </ul>
+          </li>
+          <li>ENG <span class="arrow_carrot-down"></span>
+              <ul>
+                  <li>Spanish</li>
+                  <li>ENG</li>
+              </ul>
+          </li> {% endcomment %}
+          <li><a href="#">Sign in</a> <span class="arrow_carrot-down"></span></li>
+      </ul>
+  </div>
+</div>
+<!-- Offcanvas Menu End -->
+
+<!-- Header Section Begin -->
+<header class="header">
+  <div class="header__top">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-12">
+                  <div class="header__top__inner">
+                      <div class="header__top__left">
+                        <h3 style="color: orange; font-weight: bold;">SWIPE_CAKE</h3>
+                          <ul>
+                              {% comment %} <li>USD <span class="arrow_carrot-down"></span>
+                                  <ul>
+                                      <li>EUR</li>
+                                      <li>USD</li>
+                                  </ul>
+                              </li>
+                              <li>ENG <span class="arrow_carrot-down"></span>
+                                  <ul>
+                                      <li>Spanish</li>
+                                      <li>ENG</li>
+                                  </ul>
+                              </li> {% endcomment %}
+                              {% comment %} <li><a href="#">Sign in</a> </li>
+                              <li> <a href="#">log in</a></li> {% endcomment %}
+                          </ul>
+                      </div>
+                      <div class="header__logo">
+                          <a href="./index.html"><img src="{% static '/img/logo.png' %}" alt=""></a>
+                      </div>
+                      <div class="header__top__right">
+                          <div class="header__top__right__links">
+                              <a href="#" class="search-switch"><img src="{% static '/img/icon/search.png' %}" alt=""></a>
+                              <a href="{% url 'View_userswishlist' %}"><img src="{% static '/img/icon/heart.png' %}" alt=""></a>
+                          </div>
+                          <div class="header__top__right__cart">
+                              <a href="{% url 'view_cart' %}"><img src="{% static '/img/icon/cart.png' %}" alt=""> <span>{{cart_count}}</span></a>
+                              <div class="cart__price">Cart: <span>Rs.{{cart_total}}</span></div></div>
+                              <div class="header__top__right__cart" style="margin-left: 2vw">
+                                  <a href="#"><img src="{% static '/img/user-icon.png' %}" alt=""></a>
+                                  </div>
+                              
+                             
+                              {% comment %} <div class="btn btn-success">logout</div> {% endcomment %}
+{% comment %} 
+                              <div><img src="{% static '/img/user-icon.png' %}" alt=""></div>      {% endcomment %}
+                          </div>
+                          
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="canvas__open"><i class="fa fa-bars"></i></div>
+      </div>
+  </div>
+  <div class="container">
+      <div class="row">
+          <div class="col-lg-12">
+              <nav class="header__menu mobile-menu">
+                  <ul>
+                      <li><a href="{% url 'homeafter' %}">Home</a></li>
+                      <li><a href="{% url 'about' %}">About</a></li>
+                      <li class="active"><a href="./shop.html">Shop</a></li>
+                      <li><a href="#">Pages</a>
+                          <ul class="dropdown">
+                              <li><a href="./shop-details.html">Shop Details</a></li>
+                              <li><a href="{% url 'view_cart' %}">Shoping Cart</a></li>
+                              <li><a href="./checkout.html">Check Out</a></li>
+                              <li><a href="{% url 'View_userswishlist' %}">Wisslist</a></li>
+                              {% comment %} <li><a href="./Class.html">Class</a></li>
+                              <li><a href="./blog-details.html">Blog Details</a></li> {% endcomment %}
+                          </ul>
+                      </li>
+                      <li><a href="#">Registration</a>
+                          <ul class="dropdown">
+                              <li><a href="./shop-details.html">Online Class</a></li>
+                              <li><a href="./shoping-cart.html">Offline Class</a></li>
+                          </ul>
+                      </li>
+                      <li><a href="{% url 'contact' %}">Contact</a></li>
+                      {% comment %} {% comment %} <li><a href="./blog.html">login</a></li> {% endcomment %}
+                      <li><a href="{% url 'logout' %}">logout</a></li> 
+                  </ul>
+              </nav>
+          </div>
+      </div>
+  </div>
+</header>
+<!-- Header Section End -->
+
+
+
+<section class="product spad">
+    <div class="container">
+        <div class="row">
+            {% for p in products %}
+            <div class="col-md-3">
+                <div class="product__item "> 
+                    <div class="product__item__pic set-bg" data-setbg="{{ p.product_image.url }}">
+                        <div class="overlay">
+                            <a href="{% url 'product_described' p.product_id %}" class="view-button">View</a>
+                            <div class="heart__btn">
+                                <a href="{% url 'Users_wishlist' p.product_id %}">
+                                    <span class="icon-background">
+                                        <span class="icon_heart_alt"></span>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        
+                   
+                       
+                        <div class="product__label">
+                            <span>{{ p.product_category }}</span>
+                            
+                        </div>
+                    </div>
+                    <div class="product__item__text">
+                        <h6><a href="#">{{ p.product_name }}</a></h6>
+                        
+                        <div class="product__item__price">₹{{ p.product_price }}</div>
+                        <div class="cart_add">
+                            <a href="{% url 'add_to_cart' p.product_id %}">Add to cart</a>
+                            
+                         
+                                {% comment %} <a href="{% url 'Users_wishlist' p.product_id %}"><img src="{% static '/img/icon/heart.png' %}" alt=""  ></a> {% endcomment %} 
+                        </div>
+                     
+                        
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock content %}
