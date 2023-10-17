@@ -7,7 +7,7 @@ from django.conf import settings
 
 
 
-TWILIO_AUTH_TOKEN = '442798afefcf514331e27e88d171ba48'
+TWILIO_AUTH_TOKEN = 'fe9a78f13042d85f269dea9a2f58181d'
 TWILIO_ACCOUNT_SID = 'AC41b12c18ef997d6aece1818205af087d'
 otp = random.randint(100000,999999)
 def send_otp_phone(otp):

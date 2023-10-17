@@ -1,0 +1,54 @@
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|product|add {% endblock %}
+{% block content %}
+
+
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> ADD PRODUCTS </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  
+                </ol>
+              </nav>
+            </div>
+            
+              <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">COUPONS</h4>
+                    <p class="card-description"> ADD new COUPONS here.. </p>
+                    <form class="forms-sample"  method="post" action="{% url 'Add_coupons' %}">
+                            {% csrf_token %}
+                            <label for="code">Code:</label>
+                            <input class="form-control" type="text" id="code" name="code" required>
+                            <br>
+
+                            <label for="discount_type">Discount Type:</label>
+                            <select class="form-control" id="discount_type" name="discount_type" required>
+                                <option value="percentage">Percentage</option>
+                                <option value="fixed">Fixed Amount</option>
+                            </select>
+                            <br>
+
+                            <label for="discount_value">Discount Value:</label>
+                            <input class="form-control" type="text" id="discount_value" name="discount_value" required>
+                            <br>
+
+                            <label for="expiration_date">Expiration Date:</label>
+                            <input class="form-control" type="date" id="expiration_date" name="expiration_date" required>
+                            <br>
+
+                            <button type="submit" class="btn btn-primary mr-2">ADD</button>
+                            <button class="btn btn-danger">Cancel</button>
+                        </form>
+                 
+                  </div>
+                </div>
+              </div>
+             
+          
+{% endblock content %}

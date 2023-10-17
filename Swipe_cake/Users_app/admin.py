@@ -34,6 +34,7 @@ admin.site.register(CartItem)
 admin.site.register(WishlistItem)
 admin.site.register(Users_Address)
 admin.site.register(OrderItem)
+admin.site.register(Coupon)
 
 
 

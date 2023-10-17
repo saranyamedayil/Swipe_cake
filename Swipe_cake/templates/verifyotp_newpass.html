@@ -62,11 +62,11 @@
                         
                         
               
-                    <div class="container height-100 d-flex justify-content-center align-items-center">
+                    <div class="container height-300 d-flex justify-content-center align-items-center">
     
                         <div class="position-relative"> <div class="card p-2 text-center"> 
                             
-                            <form action="{% url 'verifyotp' %}" method='POST'>{% csrf_token %}
+                            <form action="{% url 'verifyotp_newpass' %}" method='POST'>{% csrf_token %}
                            <h6>Please enter the one time password <br> to verify your account</h6> <div> 
                                <span>A code has been sent to</span> <small>{{phone}}</small>
                                 </div> <div id="otp" class="inputs d-flex flex-row justify-content-center mt-2">
@@ -77,11 +77,10 @@
                                       <input class="m-2 text-center form-control rounded" type="text" id="fifth" maxlength="1"name='otp5' /> 
                                       <input class="m-2 text-center form-control rounded" type="text" id="sixth" maxlength="1"name='otp6' />
                                        </div> <div class="mt-4"> <button class="btn btn-danger px-4 validate type='submit' ">Validate</button>
-                                      
-                                        </div> </div> 
-                                    </form>
-                                        <div class="card-2"> <div class="content d-flex justify-content-center align-items-center">
-                                            <span>Didn't get the code</span> <a href="{% url 'signin_resend_otp'%}" class="text-decoration-none ms-3">Resend</a>
+                                       
+                                        </div> </div></form> 
+                                        <div class="card-2"> <div class="content d-flex justify-content-center align-items-center text-warning">
+                                            <span>Didn't get the code</span> <a href="{% url 'resend_sms' %}"> <button class='btn btn-success'>Resend</button></a>
                                              </div> </div> </div>
                    </div>
                 </div>
@@ -126,6 +125,8 @@
         }
         OTPInput();
     });
+
+
 
 
     {% for msg in messages %}

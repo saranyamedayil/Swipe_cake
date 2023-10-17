@@ -2,6 +2,95 @@
 {% load static %}
 {% block title %}Swipe_cake|otp {% endblock %}
 {% block content %}
+<style>
+    {% comment %} body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+    } {% endcomment %}
+
+    {% comment %} .hero {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+    } {% endcomment %}
+
+    {% comment %} .hero__slider {
+        width: 100%;
+        height: 100%;
+    } {% endcomment %}
+
+    {% comment %} .hero__item {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+    } {% endcomment %}
+
+    {% comment %} .container {
+        position: relative;
+        z-index: 1;
+    } {% endcomment %}
+
+    .text-center {
+        text-align: center;
+    }
+{% comment %} 
+    form {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: white;
+        border: 5px solid #fcb103;
+        border-radius: 10px;
+        margin-top: 70px;
+    } {% endcomment %}
+
+    h2 {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    p {
+        color: #333;
+    }
+
+    label {
+        display: block;
+        margin-top: 5px;
+        font-weight: bold;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border: 2px solid #ccc;
+        border-radius: 15px;
+    }
+
+    button {
+        display: inline-block;
+        padding: 15px 10px;
+        background-color: #fcb103;
+        color: white;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: #eaa602;
+    }
+</style>
+
 
 <!-- Header Section Begin -->
 <header class="header">
@@ -44,8 +133,6 @@
     </div>
 </header>
 <!-- Header Section End -->
-
-<!-- Hero Section Begin -->
 <section class="hero">
     <div class="hero__slider owl-carousel">
         <div class="hero__item set-bg" data-setbg="{% static 'img/hero/hero-1.jpg' %}">
@@ -53,126 +140,141 @@
                 <div class="row d-flex justify-content-center">
                     <div class="col-lg-4">
                         <div class='text-center'>
-                            <div style="width: 500px; height: 600px; background-color:white; border: 5px solid #fcb103; padding: 70px;">
-                     <form id="signup-form" method="POST" action="{% url 'sentotp' %}">
-                     {% csrf_token %}
+                            <div style="width: 500px; height: 700px; background-color:white; border: 5px solid #fcb103; padding: 70px;">
+                                <form method="POST" action="{% url 'sentotp' %}">
+                                    {% csrf_token %}
+               
+                                    <h2 class="fw-bold text-uppercase">Sign up</h2>
+                                <p class="text-black-50">Please create your account</p>
 
-                     <h2 class="fw-bold text-uppercase">Sign up</h2>
-                 <p class="text-white-50">Please create your account</p>
+                               <div>
+                                <label for="username"><strong>Username</strong></label>
+                                <input type="text" name='username' data-validation="username" oninput="validateUsername(event)" />
+                                
+                                <div id="username-error" style="color:red;height:20px; margin-top: 5px;"></div>
+                                   
+                               
+                                
+                               </div>
+                               <div>
+                                <label for="phonenumber"><strong>phonenumber</strong></label>
+                                <input type="number" name='phonenumber'data-validation="phonenumber">
+                                <small id="phonenumber-error" style="color: red;"></small>
+                               </div>
+                               <div>
+                                <label for="password"> <strong>password</strong></label>
+                                <input type="password" name='password' data-validation="password">
+                                <small id="password-error" style="color: red;"></small>
+                               </div>
+                               <div>
+                                <label for="confirmpassword"><strong>confirm password</strong></label>
+                                <input type="password" name='confirmpassword' data-validation="confirmpassword">
+                                <small id="confirmpassword-error" style="color: red;"></small>
+                               </div>
 
+                               <div class='text my-4'>
+                                <a href="User_login" class='text-primary' style='text-decoration: none;'>Already have an account?</a>
+                               </div>
+  
+                                <button class="primary-btn" type="submit">SEND OTP</button>
+                                    <button class="primary-btn" type="submit">clear</button>
 
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 
-  <div class="form-outline form-white">
-    <label for='username' class="form-label" for="typeEmailX">user name</label>
-    <input type='text' id="text" class="form-control form-control-lg" name='username' />
-   <small></small>
-  </div>
-  <div class="form-outline form-white">
-    <label class="form-label" for="typeEmailX">phonenumber</label>
-    <input type='number' id="phonenumber" class="form-control form-control-lg" name='phonenumber' />
-    <small></small>
-  </div>
-
-  <div class="form-outline form-white ">
-    <label for='password' class="form-label" for="typePasswordX">Password</label>
-    <input type="password" id="typePasswordX" class="form-control form-control-lg" name='password' />
-   <small></small>
-  </div>
-  <div class="form-outline form-white mb-4">
-    <label class="form-label" for="typePasswordX">confirm Password</label>
-      <input type="password"  id="typePasswordX" class="form-control form-control-lg" name='confirmpassword' />
-    <small></small>
+                </div>
+            </div>
+        </div>
     </div>
-    {% comment %} {% if messages %}
-  <ul class="messages text-danger">
-       {% for message in messages %}
-  {{ message }}
-   {% endfor %}
-        </ul>
-{% endif %} {% endcomment %}
-
-  
-<button class="primary-btn" type="submit">SEND OTP</button>
-<button class="primary-btn" type="submit">clear</button>
-  
-
-
-</div>
-
-
-</form>
-
-</div>
-</div>
-</div>
-</div>
-</div>
 </section>
+
+
 
 
 
 {% endblock content %}
 
 {% block scripts %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("signup-form");
+
+   function validateUsername(event) {
+
+    var value = event.target.value;
+   
+    var usernameError = document.getElementById("username-error");
+    usernameError.innerHTML="";
+    console.log('function starts')
+
+    //document.getElementById('username').style.border = "2px solid green";
+    var usernameInput = document.querySelector('input[name="username"]');
+
+    console.log(usernameInput)
+  
+    if (value.length === 0) {
+        const para = document.createElement('p')
+        para.innerHTML = "Username is required";
+        para.style.color = 'red';
+        usernameError.appendChild(para);
+        
+        
+        return false;
+    }
+
+    if (value.length < 4) {
+        const para = document.createElement('p')
+       // usernameError.innerHTML='';
+        console.log(para,'---------')
+        para.innerHTML = "Username must have at least 4 characters";
+        para.style.color = 'red';
+        usernameError.appendChild(para);
+        usernameError.innerHTML="Username must have at least 4 characters";
+        
+        console.log(usernameError)
+        //alert("Username must have at least 4 characters")
+        return false;
+    }
+
+    if (value.length > 10) {
+        const para = document.createElement('p')
+        para.innerHTML = "Username should be under 10 characters";
+        para.style.color = 'red';
+        usernameError.appendChild(para);
+        return false;
+    }
+    usernameError.innerHTML = "";
+    return true;
+}
     
-        form.addEventListener("submit", function (event) {
-            // Validate the username field
-            const usernameField = form.querySelector("#text");
-            const usernameValue = usernameField.value.trim();
-            if (usernameValue.length < 3) {
-                event.preventDefault();
-                alert("Username must be at least 3 characters."); // Show an alert box with the error message
-                usernameField.focus();
-            }
 
-            // Validate the phone number field
-            const phonenumberField = form.querySelector("#phonenumber");
-            const phonenumberValue = phonenumberField.value.trim();
-            const phonenumberRegex = /^\d{10}$/; // Regex for 10-digit phone number
-            if (!phonenumberRegex.test(phonenumberValue)) {
-                event.preventDefault();
-                alert("Please enter a valid 10-digit phone number."); // Show an alert box with the error message
-                phonenumberField.focus();
-            }
-
-            // Validate the password field
-            const passwordField = form.querySelector("#typePasswordX");
-            const passwordValue = passwordField.value.trim();
-            if (passwordValue.length < 6) {
-                event.preventDefault();
-                alert("Password must be at least 6 characters."); // Show an alert box with the error message
-                passwordField.focus();
-            }
-
-            // Validate the confirm password field
-            const confirmPasswordField = form.querySelector("#typePasswordX");
-            const confirmPasswordValue = confirmPasswordField.value.trim();
-            if (confirmPasswordValue !== passwordValue) {
-                event.preventDefault();
-                alert("Passwords do not match."); // Show an alert box with the error message
-                confirmPasswordField.focus();
-            }
-        });
-    });
-
-
-    {% for msg in messages %}
+// Display messages with SweetAlert2
+{% for msg in messages %}
+{% if msg.tags == 'error' %}
     Swal.fire({
-        title: 'warning',
+        title: 'Error',
+        text: '{{ msg }}',
+        icon: 'error'
+    });
+{% elif msg.tags == 'success' %}
+    Swal.fire({
+        title: 'Success',
+        text: '{{ msg }}',
+        icon: 'success'
+    });
+{% else %}
+    Swal.fire({
+        title: 'Warning',
         text: '{{ msg }}',
         icon: 'warning'
     });
-    
- 
-   
-   
-    {% endfor %}
-</script>
+{% endif %}
+{% endfor %}
+</script> 
+
+
 
 
 {% endblock scripts %}

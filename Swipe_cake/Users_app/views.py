@@ -68,6 +68,152 @@ def Users_login(request):
         return render(request,'User_login.html')
     
 
+#>>>>>>>>>>>>>>>>>>>>>>>>>>> rendering the html page for forgot password >>>>>>>>>>>>>>>>>>
+    
+
+def forgot_passwordverify(request):
+
+    return render(request,'Forgot_password_verify.html')
+
+
+#>>>>>>>>>>>>>>>>>>> phone number verifying/ the phone number is exist in the db >>>>>>>>>>>>>>>>>>>
+
+def phone_verification(request):
+
+    if request.method=='POST':
+        phonenumber=request.POST.get('phonenumber')
+
+        if not phonenumber:
+            messages.error(request,'phonenumber required')
+
+        elif Custom_users.objects.filter(phonenumber=phonenumber).exists():
+
+            otp = generate_otp()
+            print(otp,'//////////////////////////////////////')
+            
+
+            # Save the OTP in the session for verification in the next step
+            request.session['otp'] = otp
+            request.session['phonenumber'] = phonenumber
+            
+            send_otp_phone(otp)
+            ph = {'phone': phonenumber}
+
+            return render(request,'verifyotp_newpass.html',ph)
+        else:
+            messages.error(request,'invalid phonenumber')
+    
+    return redirect(forgot_passwordverify)
+
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>> sent otp will pass and verified through this function >>>>>>>>>>>>>>>>>>>>>>>>
+
+def verifyotp_newpass(request):
+    phonenumber = request.session.get('phonenumber')
+    otp = request.session.get('otp')
+    
+
+    if request.method == 'POST':
+        phone_otp = ''.join([request.POST.get(f'otp{i}', '') for i in range(1, 7)])  # Combine OTP digits
+
+        if not phonenumber or not otp:
+            messages.error(request, ' OTP required')
+            return render(request, 'Forgot_password_verify.html')
+
+        try:
+
+            if otp == phone_otp:
+                # OTP is valid, perform further actions like setting a session and redirecting
+                user = Custom_users.objects.get(phonenumber=phonenumber)
+                user.otp=phone_otp
+                print(user.otp,'//////////////////////////////////')
+                user.save()
+                return redirect('new_password')  # Redirect to creating a new password
+            else:
+                messages.error(request, 'Invalid OTP')
+                return render(request, 'verifyotp_newpass.html')
+
+        except Custom_users.DoesNotExist:
+            messages.error(request, 'Invalid phone number')
+
+    return render(request, 'Forgot_password_verify.html')
+
+
+
+ #>>>>>>>>>>>>>>>>>>unique number generating for otp >>>>>>>>>>>   
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+
+#>>>>>>>>>>>>>>>>>>>>> generating a new password >>>>>>>>>>>>>>>>>>>>>>>>
+
+
+def new_password(request):
+    if request.method == 'POST':
+        new_password = request.POST.get('password')
+        confirm_password = request.POST.get('confirmpassword')
+        phonenumber = request.session.get('phonenumber')
+
+        if new_password == confirm_password :
+            try:
+                
+                user = Custom_users.objects.get(phonenumber=phonenumber)
+                print(user,'0000000000000000000000000000')
+                
+            except Custom_users.DoesNotExist:
+                messages.error(request, 'User not found.')
+
+            user.password=new_password
+            
+            print(new_password,'///////////////////////////////////')
+            user.save()
+            messages.success(request, "Password reset successfully")
+            return redirect('login')
+
+        else:
+            messages.error(request, 'New password and confirm password do not match.')
+
+    return render(request, 'newpassword.html')  # Replace with the actual template name
+
+
+#>>>>>>>>>>>>>>>>>>>>>> resend otp >>>>>>>>>>>>>>>>>>>>>>>>>
+
+def resend_sms(request):
+    phonenumber = request.session.get('phonenumber')
+
+    if not phonenumber:
+        messages.error(request, 'Invalid phonenumber')
+        return render(request, 'verifyotp_newpass.html')
+
+    try:
+        user = Custom_users.objects.get(phonenumber=phonenumber)
+
+        # Generate a new OTP
+        new_otp = generate_otp()
+        print(new_otp,'////////////////////////')
+
+        # Update the session with the new OTP
+        request.session['otp'] = new_otp
+
+        # Save the new OTP in the user model
+        user.otp = new_otp
+        user.save()
+
+        # Send the new OTP via SMS
+        send_otp_phone(new_otp)
+
+        messages.success(request, 'OTP resent successfully')
+    except Custom_users.DoesNotExist:
+        messages.error(request, 'User not found')
+
+    return render(request, 'verifyotp_newpass.html')
+
+
+
+
+
 
 
 # sign in user page rendering
@@ -108,7 +254,8 @@ def sent_otp(request):
                     otp_to_ph = str(otp)
                     print(".............................", otp_to_ph)
                     send_otp_phone(otp_to_ph)
-                    user.password = password    
+                    user.password = password 
+                    
                     user.save()
 
                     # Save user information in the session
@@ -147,56 +294,58 @@ def verify_otp(request):
 
             if otp == phone_otp:
                 # OTP is valid, perform further actions like setting a session and redirecting
-                
+                user_obj.otp=phone_otp
                 user_obj.save()
                 request.session['username'] = user_obj.username
                 return redirect('login')  # Redirect to the login page upon successful OTP verification
             else:
                 messages.error(request, 'Invalid OTP')
-                user_obj.delete()
-                return render(request, 'Usersignin.html')
+                # user_obj.delete()
+                return render(request, 'enter_otp.html')
 
         except Custom_users.DoesNotExist:
             messages.error(request, 'Invalid phone number')
 
     return render(request, 'Usersignin.html')
 
+def signin_resend_otp(request):
+    phonenumber = request.session.get('phonenumber')
+
+    if not phonenumber:
+        messages.error(request, 'Invalid phonenumber')
+        return render(request, 'Usersignin.html')
+
+    try:
+        # Retrieve the user from the database using the phone number
+        user_obj = Custom_users.objects.get(phonenumber=phonenumber)
+
+        # Generate a new OTP
+        new_otp = generate_otp()
+        print(new_otp, '////////////////////////')
+
+        # Update the session with the new OTP
+        request.session['otp'] = new_otp
+
+        # Save the new OTP in the user model
+        user_obj.otp = new_otp
+        user_obj.save()
+
+        # Send the new OTP via SMS (uncomment the line below once you have the send_otp_phone function)
+        send_otp_phone(new_otp)
+
+        messages.success(request, 'OTP resent successfully')
+    except Custom_users.DoesNotExist:
+        messages.error(request, 'User not found')
+
+    return render(request, 'enter_otp.html')
 
 
 
-# @never_cache
-# def Users_homeafter(request):
-    
-#     product = Product_Details.objects.all()
-    
-#     context = {'product': product}
-    
-#     if 'username' in request.session:
-#             username = request.session.get('username')
 
-#         if username:
-#             # Get the user object associated with the username
-#             user = Custom_users.objects.get(username=username)
 
-#             cart_items = CartItem.objects.filter(user=user)
 
-#             subtotal_dict = {}
-#             total =Decimal(0)
-#             for item in cart_items:
-#             # Calculate the total price for each cart item
-#                 item_total = item.quantity * item.product.product_price
-#                 if item.product.product_category.category_name in subtotal_dict:
-#                     # If it exists, add the item total to the existing subtotal
-#                     subtotal_dict[item.product.product_category.category_name] += item_total
-#                 else:
-#                     # If it doesn't exist, create a new entry
-#                     subtotal_dict[item.product.product_category.category_name] = item_total
 
-#                 # Add item total to the total
-#                 total += item_total
-        
-#             return render(request,"home_after.html",context,{'cart_total': total})  #rechecking the login user is in the session or not then it allows to access home page
-#     return redirect(Users_login)
+
 @never_cache
 def Users_homeafter(request):
     context = {}
@@ -670,21 +819,32 @@ def view_cart(request):
 
         subtotal_dict = {}
         total = Decimal(0)
+      
+
+        # # Remove the discount_amount from the session
+        # if 'discount_amount' in request.session:
+        #     del request.session['discount_amount']
+
 
         for item in cart_items:
             item_total = item.quantity * item.product.product_price
 
-            if item.product.product_category.category_name in subtotal_dict:
-                subtotal_dict[item.product.product_category.category_name] += item_total
-            else:
-                subtotal_dict[item.product.product_category.category_name] = item_total
+            category_name = item.product.product_category.category_name
+            subtotal_dict[category_name] = subtotal_dict.get(category_name, 0) + item_total
 
             total += item_total
+
 
         return render(request, 'shoping-cart.html', {'cart_items': cart_items, 'subtotal_dict': subtotal_dict, 'cart_total': total})
     else:
         messages.warning(request, 'Please log in to view your cart.')
         return redirect('login')
+    
+
+
+
+
+
 
 def delete_from_cart(request, item_id):
     username = request.session.get('username')
@@ -860,22 +1020,47 @@ def get_related_products(product_id):
 
 
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>> checkout >>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>>> checkout / adding coupons >>>>>>>>>>>>>>>>>>>>>>>>
 
 
 def Product_checkout(request):
     username = request.session.get('username')
     cart_count = 0  # Default cart count
+    discount_amount = 0
+    applied_coupon = None  # Variable to store applied coupon
 
     if username:
         user = Custom_users.objects.get(username=username)
         cart_items = CartItem.objects.filter(user=user)
         subtotal_dict = {}
-
         total, cart_count = calculate_cart_total(user)  # Calculate the cart total and count
 
         # Convert the Decimal total to a float and format it as needed
         total_float = float(total)
+
+        if request.method == 'POST':
+            coupon_code = request.POST.get('coupon_code')
+
+            print(coupon_code,'///////////////////////////////////////')
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+
+                if coupon.is_valid():  # Assume you have an 'is_valid' method in your Coupon model
+                    total_float = Decimal(str(total))  # Convert float to Decimal
+                    discount_amount = apply_coupon_discount(coupon, total)
+                    print(discount_amount,'//////////////////////////////////')
+                    total_float -= discount_amount  # Deduct the discount amount from the total
+                    print(total_float,'/////////////////////////////////////')
+                    applied_coupon = coupon  # Store the applied coupon
+                    print(applied_coupon,'...................................')
+                    request.session['coupon_code'] = coupon.code
+
+                    messages.success(request, 'Coupon applied successfully.')
+                else:
+                    messages.error(request, 'Coupon has expired or is not yet valid.')
+
+            except Coupon.DoesNotExist:
+                messages.error(request, 'Invalid coupon code')
 
         for item in cart_items:
             item_total = item.quantity * item.product.product_price
@@ -885,10 +1070,85 @@ def Product_checkout(request):
             else:
                 subtotal_dict[item.product.product_category.category_name] = item_total
 
-        return render(request, 'product_checkout.html', {'cart_items': cart_items, 'subtotal_dict': subtotal_dict, 'cart_total': total_float, 'cart_count': cart_count})
+    return render(request, 'product_checkout.html', {
+        'cart_items': cart_items,
+        'subtotal_dict': subtotal_dict,
+        'cart_total': total_float,
+        'cart_count': cart_count,
+        'total': total,
+        'discount_amount': float(discount_amount),
+        'applied_coupon': applied_coupon,
+    })
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< applying coupon discounts >>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+def apply_coupon_discount(coupon, total):
+    if coupon.discount_type == 'percentage':
+        discount_amount = (coupon.discount_value / 100) * total
+    elif coupon.discount_type == 'fixed':
+        discount_amount = min(coupon.discount_value, total)  # Ensure the discount doesn't exceed the total
+
+    return  discount_amount
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> remove coupons >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+def remove_coupon(request):
+    # Remove the coupon from the session or database
+    coupon_code = request.session.get('coupon_code')
+    print(coupon_code,'...............................')
+    if coupon_code:
+        print(coupon_code)
+        del request.session['coupon_code']
+        messages.success(request,'coupon removed successfully')
+
+    return redirect(Product_checkout)
 
 
 
+#>>>>>>>>>>>>>>>>>>>>>>>> adminside coupons displaying / adding functions / delete / update >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+def Admin_couponsdisplay(request):
+    coupon={
+        'coupons':Coupon.objects.all()
+    }
+
+    return render(request,'Admin_coupons.html',coupon)
+
+def Add_coupons(request):
+      if request.method == 'POST':
+        code = request.POST.get('code')
+        discount_type = request.POST.get('discount_type')
+        discount_value = request.POST.get('discount_value')
+        expiration_date = request.POST.get('expiration_date')
+
+        # Perform necessary validation on input data before saving
+
+        Coupon.objects.create(
+            code=code,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            expiration_date=expiration_date
+        )
+
+        return redirect('Admin_couponsdisplay') 
+      
+      return render(request,'Admin_couponsAdd.html')
+
+def delete_coupons(request,coupon_id):
+     if request.method == 'POST':
+        coupon = get_object_or_404(Coupon, id=coupon_id)
+        coupon.delete()
+        return redirect(Admin_couponsdisplay)
+     return HttpResponseRedirect(reverse(Admin_couponsdisplay))
+    
+
+
+
+
+    
+
+#>>>>>>>>>>>>>>>>>>>>>>> adding new address for delivering the product >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 def New_address(request):
     username = request.session.get('username')
@@ -940,6 +1200,7 @@ def save_address(request):
             email=email
         )
         address.save()
+        messages.success(request,'address saved successfully')
 
         # Redirect to a success page or any other desired page
         return redirect('Product_checkout')  # Update with the appropriate URL name

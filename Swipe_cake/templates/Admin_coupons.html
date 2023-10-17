@@ -1,0 +1,78 @@
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|Products {% endblock %}
+{% block content %}
+
+
+
+ 
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          
+          <div class="row">
+            <div class="col-xl-12 col-sm-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="d-flex align-items-center align-self-start">
+                        <h3 class="mb-0">COUPONS</h3>
+                        <a href="{% url 'Add_coupons' %}" class='btn btn-success ml-auto'>Add COUPONS</a>
+                       
+                      </div> 
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th scope="col">Coupon id</th>
+                              
+                              <th scope="col">Coupon code</th>
+                            
+                              <th scope="col">discount type</th>
+                              <th scope="col">discount value</th>
+                              <th scope="col">Expiration date</th>
+                              
+                              <th>remove</th>
+
+                              
+                            
+                            </tr>
+                          </thead>
+                         <tbody>
+                           {% for p in coupons %}
+                              <tr>
+                                <td>{{ forloop.counter}}</td>
+                    
+                                <td>{{ p.code }}</td>
+                               
+                                <td>{{ p.discount_type }}</td>
+                                <td> {{p.discount_value}}</td>
+                                <td>{{ p.expiration_date}}</td>
+
+                                
+                                
+                                <td>
+                                  <form method="post" action="{% url 'delete_coupons' p.id%}">
+                                      {% csrf_token %}
+                                      <button type="submit" class="btn btn-danger ml-auto">Delete</button>
+                                  </form>
+                              </td> 
+                              
+
+
+                              </tr>
+                    </div>
+                    {% endfor %}
+                </tbody>
+ 
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+
+  {% endblock content %}
+ 
+ 

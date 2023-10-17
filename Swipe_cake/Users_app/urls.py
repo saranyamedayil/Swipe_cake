@@ -7,7 +7,15 @@ from .views import ProductCategoryView
 urlpatterns = [
     path("",views.Users_homebefore,name='homebefore'),
     path('User_signin',views.Users_signin,name='signin'),
+    path('signin_resend_otp',views.signin_resend_otp,name='signin_resend_otp'),
     path('User_login',views.Users_login,name='login'),
+    path('forgot_passwordverify',views.forgot_passwordverify,name='forgot_passwordverify'),
+    path('phone_verification',views.phone_verification,name='phone_verification'),
+    path('verifyotp_newpass',views.verifyotp_newpass,name='verifyotp_newpass'),
+    path('new_password',views.new_password,name='new_password'),
+    path('generate_otp',views.generate_otp),
+    path('resend_sms',views.resend_sms,name='resend_sms'),
+
     path('User_homeafter',views.Users_homeafter,name='homeafter'),
     path('logout',views.Users_logout,name='logout'),
     path('sentotp',views.sent_otp,name='sentotp'),
@@ -25,6 +33,9 @@ urlpatterns = [
     path('calculate_cart_total',views.calculate_cart_total),    
     path('product_described/<int:product_id>/',views.product_described,name='product_described'),
     path('update_quantity/<int:item_id>/',views.update_quantity,name='update_quantity'),
+    path('apply_coupon_discount',views.apply_coupon_discount,name='apply_coupon_discount'),
+    path('remove_coupon', views.remove_coupon, name='remove_coupon'),
+
     path('Product_checkout',views.Product_checkout,name='Product_checkout'),
     path('New_address',views.New_address,name='New_address'),
     path('Saved_address',views.Saved_address,name='Saved_address'),
@@ -65,6 +76,9 @@ urlpatterns = [
     path('Category_delete/<int:category_id>/',views.Category_delete,name='Category_delete'),
     path('Admin_orderstatus',views.Admin_orderstatus,name='Admin_orderstatus'),
     path('update_order_status/',views.update_order_status, name='update_order_status'),
+    path('Admin_couponsdisplay',views.Admin_couponsdisplay,name='Admin_couponsdisplay'),
+    path('Add_coupons',views.Add_coupons,name='Add_coupons'),
+    path('delete_coupons/<int:coupon_id>/',views.delete_coupons,name='delete_coupons'),
     
 
 

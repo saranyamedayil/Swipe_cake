@@ -243,13 +243,14 @@
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="cart__discount">
+                {% comment %} <div class="cart__discount">
                     <h6>Discount codes</h6>
-                    <form action="#">
-                        <input type="text" placeholder="Coupon code">
+                    <form action="{% url 'view_cart' %}" method='POST'>
+                       {% csrf_token %}
+                        <input type="text" placeholder="Coupon code" name='coupon_code'>
                         <button type="submit">Apply</button>
                     </form>
-                </div>
+                </div> {% endcomment %}
                 {% comment %} <div class="cart__total">
                     <h6>Cart total</h6>
                     <ul>
@@ -269,6 +270,12 @@
                         {% for category, subtotal in subtotal_dict.items %}
                 <li style="text-align: left; width: 50%; float: left;">{{ category }} Subtotal:</li>
                 <li style="text-align: right; width: 50%; float: right;">₹{{ subtotal }}</li>
+                {% if discount_amount %}
+                <li style="text-align: left; width: 50%; float: left;">Discount:</li>
+                <li style="text-align: right; width: 50%; float: right;">₹{{ discount_amount }}</li>
+      
+ 
+                {% endif %}
             {% endfor %}
             <li style="text-align: left; width: 50%; float: left;">Total:</li>
             <li style="text-align: right; width: 50%; float: right;">₹{{ cart_total }}</li>

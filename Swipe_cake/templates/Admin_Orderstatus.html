@@ -66,16 +66,27 @@
                                                 <td>{{ order.order_date }}</td>
                                               
                                                 <td>
-                                                    <div class="badge">
+                                                    {% comment %} <div class="badge">
                                                         <select name="order_{{ order.id }}_status" class="form-control text-white" onchange="updateOrderStatus(this)">
-                                                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
-                                                            <option value="Confirm" {% if order.status == 'Confirm' %}selected{% endif %}>Confirm</option>
-                                                            <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
-                                                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
-                                                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
-                                                            <option value="Cancel" {% if order.status == 'Cancel' %}selected{% endif %}>Cancelled</option>
+                                                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %} {% if order.status == 'Cancelled' %}disabled{% endif %}>Pending</option>
+                                                            <option value="Confirm" {% if order.status == 'Confirm' %}selected{% endif %} {% if order.status == 'Cancelled' %}disabled{% endif %}>Confirm</option>
+                                                            <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}{% if order.status == 'Cancelled' %}disabled{% endif %}>Processing</option>
+                                                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}{% if order.status == 'Cancelled' %}disabled{% endif %}>Shipped</option>
+                                                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}{% if order.status == 'Cancelled' %}disabled{% endif %}>Delivered</option>
+                                                            <option value="Cancel" {% if order.status == 'Cancelled' %}selected{% endif %} >Cancelled</option>
+                                                        </select>
+                                                    </div> {% endcomment %}
+                                                    <div class="badge">
+                                                        <select name="order_{{ order.id }}_status" class="form-control text-white" onchange="updateOrderStatus(this, '{{ order.status }}')">
+                                                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %} {% if order.status == 'Cancelled' or order.status == 'Confirm' or order.status == 'Processing' or order.status == 'Shipped' or order.status == 'Delivered' %}disabled{% endif %}>Pending</option>
+                                                            <option value="Confirm" {% if order.status == 'Confirm' %}selected{% endif %} {% if order.status == 'Cancelled' or order.status == 'Processing' or order.status == 'Shipped' or order.status == 'Delivered' %}disabled{% endif %}>Confirm</option>
+                                                            <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %} {% if order.status == 'Cancelled' or order.status == 'Shipped' or order.status == 'Delivered' %}disabled{% endif %}>Processing</option>
+                                                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %} {% if order.status == 'Cancelled' or order.status == 'Delivered'  %}disabled{% endif %}>Shipped</option>
+                                                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %} {% if order.status == 'Cancelled'  %}disabled{% endif %}>Delivered</option>
+                                                            <option value="Cancel" {% if order.status == 'Cancelled' %}selected{% endif %} {% if order.status == 'Delivered'  %}disabled{% endif %}>Cancelled</option>
                                                         </select>
                                                     </div>
+                                                    
                                                 </td>
                                                 
                                                 
@@ -96,7 +107,7 @@
 
 {% block script %}
 <script>
-    function updateOrderStatus(selectElement) {
+    {% comment %} function updateOrderStatus(selectElement) {
         // Find the form element
         var form = document.getElementById('orderStatusForm');
         // Submit the form
@@ -112,7 +123,63 @@
     
 
    
-    {% endfor %}
+    {% endfor %} {% endcomment %}
+    function updateOrderStatus(selectElement, currentStatus) {
+        // Check if the order is canceled
+        var isCancelled = currentStatus === 'Cancelled';
+    
+        // If the order is cancelled, prevent changes
+        if (isCancelled) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Cannot update status for canceled orders.',
+                icon: 'error'
+            });
+    
+            // Reset the dropdown to its original value
+            selectElement.value = currentStatus;
+    
+            return;
+        }
+    
+        // Enable all options first
+        var options = selectElement.options;
+        for (var i = 0; i < options.length; i++) {
+            options[i].disabled = false;
+        }
+    
+        // Disable options based on the current selection
+        switch (selectElement.value) {
+            case 'Delivered':
+                options[0].disabled = true; // Disable 'pending'
+                options[1].disabled = true; // Disable 'Confirm'
+                options[2].disabled = true; // Disable 'Processing'
+                options[3].disabled = true; // Disable 'Shipped'
+               
+                break;
+            case 'Confirm':
+                options[0].disabled = true; // Disable 'pending'
+                //options[3].disabled = true; // Disable 'Shipped'
+                //options[4].disabled = true; // Disable 'Delivered'
+                break;
+            case 'Processing':
+                options[0].disabled = true; // Disable 'Shipped'
+                options[1].disabled = true; // Disable 'Delivered'
+                break;
+            case 'Shipped':
+                
+                options[0].disabled = true; // Disable 'Confirm'
+                options[1].disabled = true; // Disable 'Processing'
+                options[2].disabled = true; // Disable 'Shipped'
+                break;
+        }
+    
+        // Find the form element
+        var form = document.getElementById('orderStatusForm');
+        // Submit the form
+        form.submit();
+    }
+    
 </script>
 {% endblock script %}
 
