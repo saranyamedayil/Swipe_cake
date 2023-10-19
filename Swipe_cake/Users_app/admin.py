@@ -35,6 +35,8 @@ admin.site.register(WishlistItem)
 admin.site.register(Users_Address)
 admin.site.register(OrderItem)
 admin.site.register(Coupon)
+admin.site.register(Category_Offer)
+admin.site.register(Product_Offer)
 
 
 

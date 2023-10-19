@@ -29,7 +29,7 @@
                               
                               <th scope="col">Category_name</th>
                             
-                              <th scope="col">Stock</th>
+                              {% comment %} <th scope="col">Stock</th> {% endcomment %}
                               
                             
                             </tr>
@@ -41,7 +41,7 @@
                     
                                 <td>{{ p.category_name }}</td>
                                
-                                <td>{{ p.Category_quantity }}</td>
+                                {% comment %} <td>{{ p.Category_quantity }}</td> {% endcomment %}
 
                                 <td><a href="{% url 'categoryupdate' p.category_id %}" class='btn btn-warning ml-auto'>Update</a></td>
                                 

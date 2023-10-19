@@ -256,7 +256,7 @@
                     <div class="breadcrumb__links">
                         <a href="./index.html">Home</a>
                         <a href="./shop.html">Shop</a>
-                        <span>Sweet autumn leaves</span>
+                        <span>{{ product.product_name }}</span>
                     </div>
                 </div>
             </div>
@@ -362,8 +362,18 @@
                         </div>
                         <div class="col-lg-6">
                             <div class="product__details__text">
-                                <div class="product__label">{{ product.product_category.category_name }}</div>
-                                <h4>{{ product.product_name }}</h4>
+                                <div class="product__label">{{ product.product_category.category_name }} </div>
+                                <h4>{{ product.product_name }}  </h4>
+                                {% if product_offer %}
+                                {% if product_offer.offer_type == 'percentage' %}
+                                    <p class='text-success'>Offer: {{ product_offer.discount_value }}%</p>
+                                {% else %}
+                                    <p class='text-success'>Offer: Rs.{{ product_offer.discount_value }}</p>
+                                {% endif %}
+                            {% else %}
+                                <p>No offer available for this product.</p>
+                            {% endif %}
+                            
                                 <h5>₹{{ product.product_price }}</h5>
                                 <p>{{ product.product_descrip }}</p>
                                 <ul>
@@ -396,14 +406,14 @@
                                 </div>
                             </div>
                             
-                            <div style="display: flex; align-items: center; padding-top: 20px; padding-left: 30px;">
+                            {% comment %} <div style="display: flex; align-items: center; padding-top: 20px; padding-left: 30px;">
                                 <div>
                                     <img src="{% static '/img/return delivery.png' %}" alt="" style="width: 70px; height: 50px;">
                                 </div>
                                 <div style="margin-left: 10px;">
                                     <h6 class='text-dark'>free 1 hour delivery returns <a href="" class='text-primary'>details</a></h6>
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
                             
                                    
                         </div>

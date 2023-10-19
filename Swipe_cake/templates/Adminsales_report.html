@@ -1,0 +1,64 @@
+<!-- sales_report.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sales Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+        #download-link {
+            display: inline-block;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sales Report</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Total Sales Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in sales_data %}
+                <tr>
+                    <td>{{ entry.product__product_name }}</td>
+                    <td>{{ entry.total_sales }}</td>
+                </tr>
+            {% endfor %}
+            <a href="{% url 'download_sales_report' %}" class="download-link">Download Sales Report</a>
+        </tbody>
+    </table>
+</body>
+</html>

@@ -190,8 +190,10 @@
                             <tr>
                                 <th>Image</th>
                                 <th>Product</th>
-                               
+                              
                                 <th>Quantity</th>
+                                <th>status</th>
+                                
                                 <th>Price</th>
                                 <th>Total</th>
                             </tr>
@@ -218,6 +220,13 @@
                                             <span class="increase" data-item-id="{{ item.id }}">+</span>
                                         </div>
                                     </div>
+                                </td>
+                                <td class="cart__stock">
+                                    {% if item.product.product_stock > 0 %}
+                                        <p class='text-success'> In Stock</p>
+                                    {% else %}
+                                    <p class='text-danger'>Out of Stock</p>
+                                    {% endif %}
                                 </td>
                                 <td class="cart__price" id="item_price" data-item-id="{{ item.id }}">₹{{ item.product.product_price }}</td>
                                 <td id="product_total_price" data-item-id="{{ item.id }}">₹<span class="product-total-price">{{ item.product.product_price|mul:item.quantity }}</span></td>

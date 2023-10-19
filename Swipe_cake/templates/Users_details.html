@@ -57,32 +57,7 @@
                                 <td>{{ s.username }}</td>
                                
                                 <td>{{ s.phonenumber }}</td>
-                                {% comment %} <td class='btn btn-danger create-new-button'>block</td>
-                                <td class='btn btn-success create-new-button'>unblock</td> {% endcomment %}
-                                {% comment %} <td>
-                                    <button class="btn btn-warning toggle-button" data-userid="{{ s.id }}" data-attribute="is_superuser">
-                                        {% if s.is_superuser %}Unset Superuser{% else %}Set Superuser{% endif %}
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-primary toggle-button" data-userid="{{ s.id }}" data-attribute="is_staff">
-                                        {% if s.is_staff %}Unset Staff{% else %}Set Staff{% endif %}
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-danger toggle-button" data-userid="{{ s.id }}" data-attribute="is_blocked">
-                                        {% if s.is_blocked %}Unblock{% else %}Block{% endif %}
-                                    </button>
-                                </td> {% endcomment %}
-                                {% comment %} <td>
-                                    <button id='blockUserButton' class="btn btn-danger toggle-button"
-                                            data-userid="{{ s.id }}"
-                                            data-attribute="is_blocked">
-                                        {% if s.is_blocked %}Unblocked{% else %}Block{% endif %}
-                                    </button>
-                                    
-
-                                </td> {% endcomment %}<td>
+                              <td>
                                     <button class="btn btn-danger toggle-button" data-userid="{{ s.id }}" data-attribute="is_blocked">
                                         {% if s.is_blocked %}Unblocked{% else %}Block{% endif %}
                                     </button>

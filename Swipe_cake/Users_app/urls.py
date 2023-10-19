@@ -51,6 +51,7 @@ urlpatterns = [
     path('edit_address/<int:address_id>/',views.edit_address,name='edit_address'),
     path('delete_orders/', views.delete_orders, name='delete_orders'),
     path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
+    path('generate-pdf/<int:order_id>/', views.generate_pdf, name='generate_pdf'),
 
 
 
@@ -79,6 +80,16 @@ urlpatterns = [
     path('Admin_couponsdisplay',views.Admin_couponsdisplay,name='Admin_couponsdisplay'),
     path('Add_coupons',views.Add_coupons,name='Add_coupons'),
     path('delete_coupons/<int:coupon_id>/',views.delete_coupons,name='delete_coupons'),
+    path('Admin_productoffer',views.Admin_productoffer,name='Admin_productoffer'),
+    path('productoffer_add',views.productoffer_add,name='productoffer_add'),
+    path('productoffer_delete/<int:productoffer_id>/',views.productoffer_delete,name='productoffer_delete'),
+    path('Admin_categoryoffer',views.Admin_categoryoffer,name='Admin_categoryoffer'),
+    path('Categoryoffer_add',views.Categoryoffer_add,name='Categoryoffer_add'),
+    path('categoryoffer_disable/<int:category_offer_id>/',views.categoryoffer_disable,name='categoryoffer_disable'),
+    path('sales-report/', views.sales_report, name='sales_report'),
+    path('download_sales_report/', views.download_sales_report, name='download_sales_report'),
+    path('orderstatus_search',views.orderstatus_search,name='orderstatus_search'),
+
     
 
 

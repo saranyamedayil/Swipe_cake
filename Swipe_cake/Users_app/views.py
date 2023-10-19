@@ -42,10 +42,14 @@ def Users_login(request):
         username=request.POST.get('username')
         password=request.POST.get('password')
 
+        if username == "" or password == "":
+            messages.error(request,"empty form canot be validated")
+            redirect('login')
+
         try:
             user = Custom_users.objects.get(username=username)
         except ObjectDoesNotExist:
-            messages.error(request, "You are not authorized to log in.")
+            # messages.error(request, "You are not authorized to log in.")
             return render(request,'User_login.html')
         
         if user.password == password:
@@ -82,6 +86,7 @@ def phone_verification(request):
 
     if request.method=='POST':
         phonenumber=request.POST.get('phonenumber')
+
 
         if not phonenumber:
             messages.error(request,'phonenumber required')
@@ -156,7 +161,10 @@ def new_password(request):
         confirm_password = request.POST.get('confirmpassword')
         phonenumber = request.session.get('phonenumber')
 
-        if new_password == confirm_password :
+        if new_password == "" or confirm_password == "":
+            messages.error(request,"empty form cannot submit")
+
+        elif new_password == confirm_password :
             try:
                 
                 user = Custom_users.objects.get(phonenumber=phonenumber)
@@ -513,6 +521,24 @@ def User_search(request):
     return render(request,"Users_details.html",user)
 
 
+def orderstatus_search(request):
+    if 'q' in request.GET:
+        q = request.GET['q']
+        multiple_s = Q(
+            Q(user__username__icontains=q) |
+            Q(order_number__icontains=q) |
+            Q(orderitems__product__product_name__icontains=q) |
+            Q(order_date__icontains=q) |
+            Q(payment_method__icontains=q)
+        )
+        orders = Order.objects.filter(multiple_s).distinct()
+
+
+    context = {
+        'orders': orders
+    }
+    return render(request, "Admin_Orderstatus.html", context)
+
     
 
     
@@ -681,17 +707,22 @@ def Category_add(request):
     if request.method=='POST':
         Categoryname = request.POST['categoryname']
         quantity = request.POST.get('quantity', 0)  # Default to 0 if not provided
+
+        if Categoryname == "" or quantity == "":
+            messages.error(request,'fill the fields')
+
         
+        else:
 
         # Create a Product_Details instance with the correct field names
-        category = Product_Category(
-            category_name=Categoryname,
-            Category_quantity=quantity  # Provide the value for product_quantity
-        )
-        category.save()
+            category = Product_Category(
+                category_name=Categoryname,
+                Category_quantity=quantity  # Provide the value for product_quantity
+            )
+            category.save()
 
 
-        return redirect(product_category_all)
+            return redirect(product_category_all)
     
 
     return render(request,'Category_add.html')
@@ -751,6 +782,14 @@ class ProductCategoryView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         category_name = self.kwargs['category_name']
+
+        # Fetch category-wise offer
+        try:
+            category_offer = Category_Offer.objects.get(category__category_name=category_name,
+                                                        expiration_date__gte=timezone.now().date())
+            context['category_offer'] = category_offer
+        except Category_Offer.DoesNotExist:
+            context['category_offer'] = None
 
         # Calculate cart total using the calculate_cart_total function
         if 'username' in self.request.session:
@@ -871,6 +910,7 @@ def calculate_cart_total(user):
         item_total = item.quantity * item.product.product_price
         total += item_total
         cart_count += item.quantity
+    
 
     return total,cart_count
 
@@ -1000,7 +1040,12 @@ def product_described(request,product_id):
         'cart_total': total,
         'cart_count': cart_count
     }
-        
+     # Fetch product offer
+        try:
+            product_offer = Product_Offer.objects.get(product=product, expiration_date__gte=timezone.now().date())
+            context['product_offer'] = product_offer
+        except Product_Offer.DoesNotExist:
+            context['product_offer'] = None
 
     return render(request,'Described_Productdetails.html',context)
 
@@ -1028,6 +1073,8 @@ def Product_checkout(request):
     cart_count = 0  # Default cart count
     discount_amount = 0
     applied_coupon = None  # Variable to store applied coupon
+    Ct_discount_amount = 0
+    pddiscount_amount = 0
 
     if username:
         user = Custom_users.objects.get(username=username)
@@ -1037,6 +1084,7 @@ def Product_checkout(request):
 
         # Convert the Decimal total to a float and format it as needed
         total_float = float(total)
+        total_float = Decimal(str(total)) 
 
         if request.method == 'POST':
             coupon_code = request.POST.get('coupon_code')
@@ -1044,25 +1092,71 @@ def Product_checkout(request):
             print(coupon_code,'///////////////////////////////////////')
             try:
                 coupon = Coupon.objects.get(code=coupon_code)
+                
 
                 if coupon.is_valid():  # Assume you have an 'is_valid' method in your Coupon model
-                    total_float = Decimal(str(total))  # Convert float to Decimal
-                    discount_amount = apply_coupon_discount(coupon, total)
-                    print(discount_amount,'//////////////////////////////////')
-                    total_float -= discount_amount  # Deduct the discount amount from the total
-                    print(total_float,'/////////////////////////////////////')
-                    applied_coupon = coupon  # Store the applied coupon
-                    print(applied_coupon,'...................................')
-                    request.session['coupon_code'] = coupon.code
+                    if total_float >500:
+                        total_float = Decimal(str(total))  # Convert float to Decimal
+                        discount_amount = apply_coupon_discount(coupon, total)
+                        print(discount_amount,'//////////////////////////////////')
+                        total_float -= discount_amount  # Deduct the discount amount from the total
+                        print(total_float,'/////////////////////////////////////')
+                        applied_coupon = coupon  # Store the applied coupon
+                        print(applied_coupon,'...................................')
+                        request.session['coupon_code'] = coupon.code
 
-                    messages.success(request, 'Coupon applied successfully.')
+                        messages.success(request, 'Coupon applied successfully.')
+                    else:
+                        messages.error(request,"your order lessthan 500 coupon canot be apply")
                 else:
                     messages.error(request, 'Coupon has expired or is not yet valid.')
 
             except Coupon.DoesNotExist:
                 messages.error(request, 'Invalid coupon code')
 
+        # Fetch and apply category-wise offers and product-wise offers
         for item in cart_items:
+            category = item.product.product_category
+
+            # Category-wise offer
+            try:
+                category_offer = Category_Offer.objects.get(category=category, expiration_date__gte=timezone.now().date(), is_active=True)
+                print(category_offer,'////////////////////////////////')
+                print(category_offer.category)
+                print(category_offer.is_active)
+
+                # Apply category-wise offer based on offer type (percentage or fixed)
+                if category_offer.offer_type == 'percentage':
+                    Ct_discount_amount += (category_offer.discount_value / 100) * item.product.product_price * item.quantity
+                    print(Ct_discount_amount,'///////////////////')
+                elif category_offer.offer_type == 'fixed':
+                    Ct_discount_amount += category_offer.discount_value
+
+                # Store the applied offer in the CartItem object for display in the template
+                item.category_offer = category_offer
+
+            except Category_Offer.DoesNotExist:
+                pass  # No category-wise offer for this category
+
+            # Product-wise offer
+            product = item.product
+            try:
+                product_offer = Product_Offer.objects.get(product=product, expiration_date__gte=timezone.now().date(), is_active=True)
+                print(product_offer, '2222222222222222222222222222222222222')
+                print(product_offer.is_active)
+
+                # Apply product-wise offer based on offer type (percentage or fixed)
+                if product_offer.offer_type == 'percentage':
+                    pddiscount_amount += product.product_price * item.quantity * (product_offer.discount_value / 100)
+                elif product_offer.offer_type == 'fixed':
+                    pddiscount_amount += product_offer.discount_value * item.quantity
+
+                # Store the applied offer in the CartItem object for display in the template
+                item.product_offer = product_offer
+
+            except Product_Offer.DoesNotExist:
+                pass  # No product-wise offer for this product
+
             item_total = item.quantity * item.product.product_price
 
             if item.product.product_category.category_name in subtotal_dict:
@@ -1070,6 +1164,13 @@ def Product_checkout(request):
             else:
                 subtotal_dict[item.product.product_category.category_name] = item_total
 
+        # Deduct category-wise and product-wise offers from the total
+        
+        total_float -= Decimal(str(Ct_discount_amount))
+        print(total_float,'decucted category offer')
+        total_float -= Decimal(str(pddiscount_amount))
+        print(total_float,'deducted product offer')
+        coupon=Coupon.objects.all()
     return render(request, 'product_checkout.html', {
         'cart_items': cart_items,
         'subtotal_dict': subtotal_dict,
@@ -1078,6 +1179,9 @@ def Product_checkout(request):
         'total': total,
         'discount_amount': float(discount_amount),
         'applied_coupon': applied_coupon,
+        'Ct_discount_amount': Ct_discount_amount,
+        'pddiscount_amount': pddiscount_amount,
+        'available_coupons':coupon
     })
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< applying coupon discounts >>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1122,17 +1226,20 @@ def Add_coupons(request):
         discount_value = request.POST.get('discount_value')
         expiration_date = request.POST.get('expiration_date')
 
+        if code == "" or discount_type == "" or discount_value == "" or expiration_date == "":
+            messages.error(request,"Empty form can't be submit")
+
         # Perform necessary validation on input data before saving
+        else:
+            Coupon.objects.create(
+                code=code,
+                discount_type=discount_type,
+                discount_value=discount_value,
+                expiration_date=expiration_date
+            )
 
-        Coupon.objects.create(
-            code=code,
-            discount_type=discount_type,
-            discount_value=discount_value,
-            expiration_date=expiration_date
-        )
-
-        return redirect('Admin_couponsdisplay') 
-      
+            return redirect('Admin_couponsdisplay') 
+        
       return render(request,'Admin_couponsAdd.html')
 
 def delete_coupons(request,coupon_id):
@@ -1184,6 +1291,8 @@ def save_address(request):
 
         username=request.session.get('username')
         user=Custom_users.objects.get(username=username)
+
+        
 
         # Create and save the new address
         address = Users_Address(
@@ -1255,6 +1364,8 @@ def place_order(request):
         selected_address_details = request.POST.get('saved-address')
         selected_payment_method = request.POST.get('payment-method')
         username = request.session.get('username')
+        order_notes = request.POST.get('order_notes', '')
+
 
         try:
             user = Custom_users.objects.get(username=username)
@@ -1270,7 +1381,14 @@ def place_order(request):
                     user=user,
                     delivery_address=address,
                     payment_method=selected_payment_method,
+                    order_notes=order_notes 
                 )
+                if selected_payment_method is None:
+            
+                    messages.warning(request, 'Please select a payment method.')
+                    return redirect('Product_checkout')
+
+                
                 new_order.save()
 
                 # Clear the existing cartitems associated with the user's order
@@ -1295,23 +1413,49 @@ def place_order(request):
 
                 # If the selected payment method is 'OnlinePayment', initiate Razorpay payment
                 if selected_payment_method == 'OnlinePayment':
-                    # Initialize Razorpay client with your API keys
-                    razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-                    razorpay_client = razorpay.Client(
-                                    auth=(
-                                        getattr(settings, 'RAZORPAY_KEY_ID', ''),
-                                        getattr(settings, 'RAZORPAY_KEY_SECRET', ''),
-                                    )
-                                )
+                    for order_item in new_order.cartitems.all():
+                        product = order_item.product
+                        if product.product_stock < order_item.quantity:
+                            messages.error(request,'out of stock')
+
+                        else:
+                            # Initialize Razorpay client with your API keys
+                            razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                            razorpay_client = razorpay.Client(
+                                            auth=(
+                                                getattr(settings, 'RAZORPAY_KEY_ID', ''),
+                                                getattr(settings, 'RAZORPAY_KEY_SECRET', ''),
+                                            )
+                                        )
 
 
-                    # Create a Razorpay order
-                    razorpay_order = razorpay_client.order.create({'amount': total_amount, 'currency': 'INR'})
+                            # Create a Razorpay order
+                            razorpay_order = razorpay_client.order.create({'amount': total_amount, 'currency': 'INR'})
 
-                    return render(request, 'razorpay.html', {'order': new_order, 'razorpay_order': razorpay_order})
+                            return render(request, 'razorpay.html', {'order': new_order, 'razorpay_order': razorpay_order})
 
                 # If the selected payment method is not 'OnlinePayment', save the order
                 new_order.save()
+
+                # # Deduct product quantities
+                # for order_item in new_order.cartitems.all():
+                #     product = order_item.product
+                #     product.product_stock -= order_item.quantity
+                #     product.save()
+                
+                # Check product stock availability
+                for order_item in new_order.cartitems.all():
+                    product = order_item.product
+                    if product.product_stock >= order_item.quantity:
+                        # Deduct product quantity only if stock is sufficient
+                        product.product_stock -= order_item.quantity
+                        product.save()
+                    else:
+                        # If stock is insufficient, handle the situation accordingly
+                        messages.warning(request, f"Insufficient stock for product {product.product_name}")
+                        new_order.delete()
+                        return redirect(Product_checkout)
+
 
                 # Clear the user's cart after placing the order
                 CartItem.objects.filter(user=user).delete()
@@ -1484,8 +1628,7 @@ def cancel_order(request, order_id):
         # Update the status to 'Cancelled'
         order.status = 'Cancelled'
         
-        # Update the payment method to disable it (assuming you have a field for payment status)
-        order.payment_method = 'Disabled'
+        
 
         # Save the changes
         order.save()
@@ -1538,5 +1681,255 @@ def edit_address(request, address_id):
 
 
 
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>> product offer displaying / adding / deleting >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+def Admin_productoffer(request):
+
+    productoffers={
+        'productoffer':Product_Offer.objects.all()
+    }
+
+    return render(request,'Admin_productoffer.html',productoffers)
+
+def productoffer_add(request):
+
+    products={
+        'product':Product_Details.objects.all()
+    }
+    if request.method == 'POST':
+        product_id= request.POST.get('product')
+        offer_type = request.POST.get('offer_type')
+        discount_value = request.POST.get('discount_value')
+        expiration_date = request.POST.get('expiration_date')
+
+        if product_id == "" or offer_type == "" or discount_value == "" or expiration_date == "":
+            messages.error(request,"Empty form can't be submit")
+            return redirect(productoffer_add)
+
+        # Perform necessary validation on input data before saving
+        else:
+            product = Product_Details.objects.get(product_id=product_id)
+            Product_Offer.objects.create(
+                product=product,
+                offer_type=offer_type,
+                discount_value=discount_value,
+                expiration_date=expiration_date
+            )
+
+
+        return redirect(Admin_productoffer)
+
+    return render(request,'Adminproductoffer_add.html',products)
+
+def productoffer_delete(request,productoffer_id):
+    productoffer=get_object_or_404(Product_Offer,id=productoffer_id)
+    if request.method=='POST':
+        productoffer.is_active = not productoffer.is_active
+        productoffer.save()
+        return redirect(Admin_productoffer)
+    return HttpResponseRedirect(reverse(Admin_productoffer))
+    
+        
+    
+
+
+
+
+
+
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> category offer displaying / adding / deleting >>>>>>>>>>>>>>>>>>>>>>
+
+def Admin_categoryoffer(request):
+
+    categoryoffers={
+        'categoryoffer':Category_Offer.objects.all()
+    }
+
+    return render(request,'Admin_categoryoffer.html',categoryoffers)
+
+def Categoryoffer_add(request):
+    productcategory={
+        'product_categories':Product_Category.objects.all()
+    }
+
+    if request.method == 'POST':
+        category_id= request.POST.get('category')
+        offer_type = request.POST.get('offer_type')
+        discount_value = request.POST.get('discount_value')
+        expiration_date = request.POST.get('expiration_date')
+
+        if category_id == "" or offer_type == "" or discount_value == "" or expiration_date == "":
+            messages.error(request,"Empty form can't be submit")
+            return redirect(Categoryoffer_add)
+
+        # Perform necessary validation on input data before saving
+        else:
+            category = Product_Category.objects.get(category_id=category_id)
+            Category_Offer.objects.create(
+                category=category,
+                offer_type=offer_type,
+                discount_value=discount_value,
+                expiration_date=expiration_date
+            )
+
+
+
+        return redirect(Admin_categoryoffer)
+    return render(request,'Categoryoffer_add.html',productcategory)
+
+
+def categoryoffer_disable(request, category_offer_id):
+    categoryoffer = get_object_or_404(Category_Offer, id=category_offer_id)
+
+    if request.method == 'POST':
+        # Toggle the is_active field
+        categoryoffer.is_active = not categoryoffer.is_active
+        categoryoffer.save()
+
+    return HttpResponseRedirect(reverse('Admin_categoryoffer'))
+
+
+
+#<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> download order invoce using reportlab >>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from io import BytesIO
+from django.template import Context
+
+def generate_pdf(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        return HttpResponse("Order not found.", status=404)
+
+    # Fetch order items for the given order
+    order_items = OrderItem.objects.filter(orders=order)
+
+
+
+    # Create a file-like buffer to receive PDF data.
+    buffer = BytesIO()
+
+    # Create the PDF object, using the buffer as its "file."
+    pdf_content = render_to_pdf('invoice_template.html', {'order': order, 'order_items': order_items})
+
+    if pdf_content:
+        buffer.write(pdf_content)
+
+        # Set the buffer position to the start to ensure the entire content is written to the response
+        buffer.seek(0)
+
+        # Create a response with PDF content
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="order_invoice_{order_id}.pdf"'
+        return response
+
+    return HttpResponse("Error generating PDF.", status=500)
+
+def render_to_pdf(template_path, context):
+    template = get_template(template_path)
+    html = template.render(context)
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+    
+    if not pdf.err:
+        return result.getvalue()
+    
+    return None
+
 
   
+#>>>>>>>>>>>>>>>>>. admin sales report >>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+from django.db.models import Sum
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from reportlab.pdfgen import canvas
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+
+
+
+# def sales_report(request):
+#     # Query sales data
+#     sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
+
+#     return render(request, 'Adminsales_report.html', {'sales_data': sales_data})
+
+def sales_report(request):
+    # Query sales data
+    sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
+ 
+    return render(request, 'Adminsales_report.html', {'sales_data': sales_data})
+
+
+
+def generate_pdf(sales_data):
+    buffer = BytesIO()
+
+    # Create the PDF object using BytesIO as its "file"
+    p = canvas.Canvas(buffer, pagesize=letter)
+
+    # Set styles
+    p.setFont("Helvetica", 12)
+
+    # Use the sales_data to populate the PDF content
+    # For simplicity, we'll just add a basic table
+    table_data = [['Product Name', 'Total Sales Quantity']] + \
+                 [[entry['product__product_name'], entry['total_sales']] for entry in sales_data]
+
+     # Set table styles
+ # Set table styles
+    col_widths = [p.stringWidth(str(cell_value), "Helvetica", 12) + 6 for cell_value in table_data[0]]
+    row_height = 20
+    width, height = letter
+    x = 40
+    y = height - 100
+
+    # Draw table headers
+    for col_num, cell_value in enumerate(table_data[0]):
+        p.drawString(x, y, cell_value)
+        x += col_widths[col_num]
+    
+    # Draw table rows
+    y -= row_height
+    for row in table_data[1:]:
+        x = 40
+        for col_num, cell_value in enumerate(row):
+            p.drawString(x, y, str(cell_value))
+            x += col_widths[col_num]
+        y -= row_height
+
+    # Close the PDF object cleanly, and we're done.
+    p.showPage()
+    p.save()
+
+    # FileResponse sets the Content-Disposition header so that browsers
+    # present the option to save the file.
+    buffer.seek(0)
+    return buffer
+
+def download_sales_report(request):
+    # Query sales data
+    sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
+
+    # Generate PDF content
+    pdf_buffer = generate_pdf(sales_data)
+
+    # Create the HttpResponse object with the appropriate PDF headers.
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
+
+    # Write the PDF content to the response
+    response.write(pdf_buffer.getvalue())
+
+    return response

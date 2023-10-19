@@ -17,8 +17,8 @@
                   <div class="row">
                     <div class="col-12">
                       <div class="d-flex align-items-center align-self-start">
-                        <h3 class="mb-0">COUPONS</h3>
-                        <a href="{% url 'Add_coupons' %}" class='btn btn-success ml-auto'>Add COUPONS</a>
+                        <h3 class="mb-0">CATEGORY OFFER</h3>
+                        <a href="{% url 'Categoryoffer_add' %}" class='btn btn-success ml-auto'> ADD OFFER</a>
                        
                       </div> 
                       <div class="table-responsive">
@@ -40,30 +40,34 @@
                             </tr>
                           </thead>
                          <tbody>
-                           {% for p in coupons %}
+                           {% for p in categoryoffer %}
                               <tr>
                                 <td>{{ forloop.counter}}</td>
                     
-                                <td>{{ p.code }}</td>
+                                <td>{{ p.category.category_name }}</td>
                                
-                                <td>{{ p.discount_type }}</td>
-                                {% if p.discount_type == 'percentage' %}
-                                <td> {{p.discount_value|floatformat:0}}%</td>
-                                {% else %}
-                                <td>Rs. {{p.discount_value}}</td>
-
+                                <td>{{ p.offer_type }}</td>
+                                {% if p.offer_type == 'percentage' %}
+                                    <td> {{p.discount_value|floatformat:0}}%</td>
+                                {% else %}  
+                                     <td> Rs.{{p.discount_value}}</td>
                                 {% endif %}
+
                                 <td>{{ p.expiration_date}}</td>
 
                                 
+                           
                                 
-                                <td>
-                                  <form method="post" action="{% url 'delete_coupons' p.id%}">
-                                      {% csrf_token %}
-                                      <button type="submit" class="btn btn-danger ml-auto">Delete</button>
-                                  </form>
-                              </td> 
-                              
+                              <td>
+                                {% if p.is_active %}
+                                    <form method="post" action="{% url 'categoryoffer_disable' p.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Disable</button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-secondary" disabled>Disabled</button>
+                                {% endif %}
+                            </td>
 
 
                               </tr>

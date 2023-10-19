@@ -190,6 +190,20 @@
 
 
   <h4 class='text text-dark text-center font-weight-bold'>Displaying the products in category {{ category_name }}</h4>
+  
+  {% if category_offer and category_offer.is_active %}
+ 
+    {% if category_offer.offer_type == 'percentage' %}
+    <p class='text text-success text-center font-weight-bold'>{{ category_offer.discount_value|floatformat:0 }}% offers available for {{ category_name}}'s</p>
+    {% else %}
+    <p class='text text-success text-center font-weight-bold'> Rs.{{ category_offer.discount_value|floatformat:0 }} offer available for {{ category_name}}'s</p>
+    {% endif %}
+    
+    <p class='text text-danger text-center font-weight-bold'>Offer Expires on:  {{ category_offer.expiration_date }}</p>
+{% else %}
+    <h5 class='text-danger text-center'>No offer available.</h5>
+{% endif %}
+
   <ul>
     {% for product in products %}
       

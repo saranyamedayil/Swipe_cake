@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .invoice-container {
+            max-width: 1000px;
+            margin: 120px auto;
+        }
+
+        .invoice-heading {
+            font-size: 35px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-align: center; 
+        }
+
+        .invoice-section {
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 2px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 18px; /* Increase text size */
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container auto">
+        <div class="invoice-heading">
+            Invoice for Order #{{ order.order_number }}
+        </div>
+
+        <div class="invoice-section">
+            <table>
+                <tr>
+                    <th>Order Date</th>
+                    <td>{{ order.order_date }}</td>
+                </tr>
+                <tr>
+                    <th>Customer</th>
+                    <td>{{ order.user.username }}</td>
+                </tr>
+               
+                <tr>
+                    <th>Delivery Address</th>
+                    <td>{{ order.delivery_address.first_name }} {{ order.delivery_address.last_name }},
+                        {{ order.delivery_address.street_address }}, {{ order.delivery_address.apartment }},
+                        {{ order.delivery_address.city }}, {{ order.delivery_address.state }} - {{ order.delivery_address.zipcode }}
+                      
+                    </td>
+                </tr>
+                <tr>
+                    <th>Payment Method</th>
+                    <td>{{ order.get_payment_method_display }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="invoice-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                        <tr>
+                            <td>{{ item.product.product_name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.product.product_price }}</td>
+                            <td>{{ item.price }}</td>
+                           
+                            
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

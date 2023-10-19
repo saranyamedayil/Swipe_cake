@@ -2,8 +2,10 @@
 {% load static %}
 {% load cart_tags %}
 {% load custom_filters %}
+
 {% block title %}Swipe_cake|Chocolates {% endblock %}
 {% block content %}
+
 
 <style>
     .checkout__total__products {
@@ -215,14 +217,21 @@
         <div class="container">
             <div class="checkout__form">
                 <div class="col-lg-4 col-md-6"> 
-                <div class="cart__discount">
+                <div class="cart__discount ">                    
                     <h6>Discount codes</h6>
+                    <p class='text-success my-0'>coupons only applicable for order ><span class='text-danger'> 500</span> </p>
                     <form action="{% url 'Product_checkout' %}" method='POST'>
-                       {% csrf_token %}
-                        <input type="text" placeholder="Coupon code" name='coupon_code' class='input1'>
+                        {% csrf_token %}
+                        <input type="text" placeholder="Enter Coupon code" name='coupon_code' id="couponInput" class='input1'>
                         <button class="site-btn" type="submit">Apply</button>
-                       
                     </form>
+                    
+                    <select name="coupon_code" class="input" id="couponSelect" onchange="updateCouponCode()">
+                        <option value="" disabled selected>Available coupons</option>
+                        {% for coupon in available_coupons %}
+                            <option value="{{ coupon.code }}">{{ coupon.code }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 </div>
                 <form action="{% url 'place_order' %}" method='POST'>
@@ -263,7 +272,7 @@
                             <div class="checkout__input">
                                 <p>Order notes<span>*</span></p>
                                 <input type="text"
-                                placeholder="Notes about your order, e.g. special notes for delivery.">
+                                placeholder="Notes about your order, e.g. special notes for delivery." name='order_notes'>
                             </div>
                             
                         </div>
@@ -295,11 +304,11 @@
                                                     </ul> 
                                         
                               
-                                    {% endfor %}
+                                                    {% endfor %}
                                 
                                         <ul class="checkout__total__all">
                                             
-                                        <li >Subtotal <span>₹{{ total }}</span></li>
+                                        <li >Subtotal <span>₹{{ total|floatformat:2 }}</span></li>
                                        
                                                 {% if applied_coupon %}
                                                 <p>Applied Coupon: <strong>{{ applied_coupon.code }}</strong></p>
@@ -307,11 +316,29 @@
                                                 <button class='btn btn-danger'><a href="{% url 'remove_coupon' %}" style="text-decoration: none; color: white;">Remove</a></button>
                                                 <li >Discount Amount: <span>₹{{ discount_amount }}</span></li>
                                                 
+                                                {% endif %}
+                                                {% for item in cart_items %}
+                                                {% if item.product_offer %}
+                                                <p>Applied Offer: 
+                                                    <strong><br>  {{ item.product.product_name}} offer - ₹ {{ item.product_offer.discount_value }}</strong></p>
+                                                    <li >Discount Amount: <span>₹{{ pddiscount_amount }}</span></li>
+                                                {% endif %}
+
+                                                {% if item.category_offer %}
+                                                <p>Applied Offer: 
+                                                    <strong><br>{{ item.product.product_category.category_name }} offer - {{ item.category_offer.discount_value|floatformat:0 }}%</p>
+                                                        <li >Discount Amount: <span>₹{{ Ct_discount_amount }}</span></li>
                                             {% endif %}
-                                            <li>Total <span>₹{{cart_total}}</span></li>
+                                            {% endfor %}
+                                            
+                                           
+                                                <li>Total <span>₹{{ cart_total|floatformat:2 }}</span></li>
+                                           
+
+                                            {% comment %} <li>Total <span>₹{{cart_total}}</span></li> {% endcomment %}
                                             </ul>
                                
-                            
+                                            
                         
                                
                                 <div class="checkout__input__radio">
@@ -478,9 +505,7 @@ document.addEventListener('DOMContentLoaded', function () {
       
         if (!selectedAddressCheckbox) {
             alert('Please select a saved address before placing the order.');
-        } else if (!selectedPaymentRadio) {
-            alert('Please select a payment method.');
-        } else {
+        }else {
             const selectedAddressId = selectedAddressCheckbox.value;
             const selectedAddressDetails = getAddressDetailsById(selectedAddressId);
             const selectedPaymentMethod = selectedPaymentRadio.value;
@@ -500,6 +525,18 @@ document.addEventListener('DOMContentLoaded', function () {
         // Add your order placement logic here
     }
 });
+
+
+    function updateCouponCode() {
+        var select = document.getElementById('couponSelect');
+        var input = document.getElementById('couponInput');
+
+        // Get the selected option value
+        var selectedValue = select.options[select.selectedIndex].value;
+
+        // Update the input field with the selected coupon code
+        input.value = selectedValue;
+    }
 
 
 

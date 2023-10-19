@@ -1,0 +1,66 @@
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin | Product | Add Category Offer {% endblock %}
+{% block content %}
+
+    <!-- partial -->
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h3 class="page-title"> ADD CATEGORY OFFERS </h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        
+                    </ol>
+                </nav>
+            </div>
+            
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">PRODUCT OFFERS</h4>
+                        <p class="card-description"> Add new PRODUCT Offers here.. </p>
+                        <form class="forms-sample" method="post" action="{% url 'productoffer_add' %}">
+                            {% csrf_token %}
+                            <label for="product">PRODUCT:</label>
+                            <select class="form-control" id="product" name="product" >
+                                {% for p in product %}
+                                    <option value="{{ p.product_id }}">{{ p.product_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+
+                            <label for="offer_type">Offer Type:</label>
+                            <select class="form-control" id="offer_type" name="offer_type" >
+                                <option value="percentage">Percentage</option>
+                                <option value="fixed">Fixed Amount</option>
+                            </select>
+                            <br>
+
+                            <label for="discount_value">Discount Value:</label>
+                            <input class="form-control" type="text" id="discount_value" name="discount_value" >
+                            <br>
+
+                            <label for="expiration_date">Expiration Date:</label>
+                            <input class="form-control" type="date" id="expiration_date" name="expiration_date" >
+                            <br>
+
+                            {% if messages %}
+                                <ul class="messages text-danger">
+                                    {% for message in messages %}
+                                        {{ message }}
+                                    {% endfor %}
+                                </ul>
+                            {% endif %} 
+
+                            <button type="submit" class="btn btn-primary mr-2">ADD</button>
+                            <button class="btn btn-danger">
+                                <a style="text-decoration:none;" class='text-white' href="{% url 'Admin_productoffer' %}">Cancel</a>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

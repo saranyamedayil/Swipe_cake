@@ -83,20 +83,20 @@
                             <h2 class="fw-bold text-uppercase">log in</h2>
                             <div class="form-group text-dark">
                                 <label for="username" class='text'>username</label>
-                                <input type="text" class='form-control' placeholder='Username' name='username' required>
+                                <input type="text" class='form-control' placeholder='Username' name='username' >
                                 <label for="password" >password</label>
-                                <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
+                                <input type="password" class="form-control" id="password" placeholder="Password" name="password" >
                             </div>
                             <div class='text my-4'>
                                 <a href="forgot_passwordverify" class='text-primary' style='text-decoration: none; '>forgot password?</a>
                                </div>
-                            {% comment %} {% if messages %}
+                         {% if messages %}
                                 <ul class="messages text-danger">
                                 {% for message in messages %}
                                      {{ message }}
                                 {% endfor %}
                                  </ul>
-                            {% endif %} {% endcomment %}
+                            {% endif %} 
                             <button class="primary-btn " type="submit">login</button>
                         </form>
                     </div>
@@ -112,7 +112,7 @@
 
 {% endblock content %}
 
-{% block scripts%} 
+{% comment %} {% block scripts%} 
 
 <script>
     {% for msg in messages %}
@@ -139,4 +139,4 @@
 
 
 </script>
-{% endblock scripts%}
+{% endblock scripts%} {% endcomment %}

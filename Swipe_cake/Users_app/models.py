@@ -132,6 +132,7 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)  # Payment method field
     cartitems = models.ManyToManyField('OrderItem', blank=True)
     order_number = models.CharField(max_length=100, unique=True,default='000000')
+    order_notes=models.TextField(max_length=255,default='no message')
   
 
 
@@ -176,9 +177,30 @@ class Coupon(models.Model):
     discount_type = models.CharField(max_length=10, choices=[('percentage', 'Percentage'), ('fixed', 'Fixed Amount')])
     discount_value = models.DecimalField(max_digits=10, decimal_places=2)
     expiration_date = models.DateField()
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.code
 
     def is_valid(self):
         return timezone.now().date() <= self.expiration_date
+    
+class Category_Offer(models.Model):
+    category = models.ForeignKey(Product_Category, on_delete=models.CASCADE)
+    offer_type = models.CharField(max_length=10, choices=[('percentage', 'Percentage'), ('fixed', 'Fixed Amount')])
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    expiration_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.category} - {self.offer_type} - {self.discount_value}"
+    
+class Product_Offer(models.Model):
+    product = models.ForeignKey(Product_Details, on_delete=models.CASCADE)
+    offer_type = models.CharField(max_length=10, choices=[('percentage', 'Percentage'), ('fixed', 'Fixed Amount')])
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    expiration_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.product} - {self.offer_type} - {self.discount_value}"
