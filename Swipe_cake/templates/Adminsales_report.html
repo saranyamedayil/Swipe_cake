@@ -1,4 +1,4 @@
-<!-- sales_report.html -->
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -38,11 +38,31 @@
             text-decoration: none;
             border-radius: 5px;
         }
+       
+            .filter-button {
+                background-color: #007BFF;
+                color: #fff;
+                padding: 8px;
+                border: none;
+                border-radius: 15px;
+                text-decoration: none;
+                cursor: pointer;
+            }
+        
+        
     </style>
 </head>
 <body>
     <h1>Sales Report</h1>
-
+    <form method="get" action="{% url 'sales_report' %}">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
+        {% comment %} <input type="submit" value="Filter" class='btn btn-success'> {% endcomment %}
+        <button type="submit" value="Filter" class="filter-button">filter</button>
+    </form>
+    
     <table>
         <thead>
             <tr>

@@ -37,6 +37,7 @@ admin.site.register(OrderItem)
 admin.site.register(Coupon)
 admin.site.register(Category_Offer)
 admin.site.register(Product_Offer)
+admin.site.register(Message)
 
 
 

@@ -15,10 +15,19 @@
               <div class="card">
                 <div class="card-body">
                   <div class="row">
-                    <div class="col-6">
+                    <div class="col-10">
                       <div class="d-flex align-items-center align-self-start">
-                        <h3 class="mb-0">PRODUCTS</h3>
+                        <h3 class="mb-0">CATEGORIES</h3>
+                        <ul class="navbar-nav w-50 mx-5">
+                          <li class="nav-item w-50">
+                            <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search" method='GET' action="{% url 'category_search' %}">{% csrf_token %}
+                              <input type="text" class="form-control" placeholder="Search categories" name='q'>
+                              <button class="btn btn-primary mx-2" type="submit"> Search</button>
+                            </form>
+                          </li>
+                        </ul>
                         <a href="{% url 'categoryadd' %}" class='btn btn-success ml-auto'>Add category</a>
+                        
                        
                       </div> 
                       <div class="table-responsive">

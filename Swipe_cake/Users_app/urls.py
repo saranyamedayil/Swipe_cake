@@ -51,8 +51,10 @@ urlpatterns = [
     path('edit_address/<int:address_id>/',views.edit_address,name='edit_address'),
     path('delete_orders/', views.delete_orders, name='delete_orders'),
     path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
-    path('generate-pdf/<int:order_id>/', views.generate_pdf, name='generate_pdf'),
+    # path('generate_pdf/<int:order_id>/', views.generate_pdf, name='generate_pdf'),
+    path('generate_pdf/<int:order_id>/', views.generate_pdf, name='generate_pdf'),
 
+  
 
 
 
@@ -89,6 +91,10 @@ urlpatterns = [
     path('sales-report/', views.sales_report, name='sales_report'),
     path('download_sales_report/', views.download_sales_report, name='download_sales_report'),
     path('orderstatus_search',views.orderstatus_search,name='orderstatus_search'),
+    path('category_search',views.category_search,name='category_search'),
+    path('coupon_search',views.coupon_search,name='coupon_search'),
+    path('home_search',views.home_search,name='home_search'),
+    path('messagess',views.messagess,name='messagess'),
 
     
 

@@ -85,15 +85,33 @@
 
                               </tr>
                     </div>
+                    
                     {% endfor %}
                 </tbody>
  
+                     <!-- main-panel ends -->
+
         <!-- partial -->
       </div>
-      <!-- main-panel ends -->
+ 
     </div>
     <!-- page-body-wrapper ends -->
+    
   </div>
+  <div class="pagination">
+    <span class="step-links">
+        {% if product.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ product.previous_page_number }}">previous</a>
+        {% endif %}
+        <span class="current-page">Page {{ product.number }} of {{ product.paginator.num_pages }}.</span>
+        {% if product.has_next %}
+            <a href="?page={{ product.next_page_number }}">next</a>
+            <a href="?page={{ product.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+ 
 
     
 

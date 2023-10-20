@@ -131,7 +131,7 @@ class Order(models.Model):
     delivery_address = models.ForeignKey(Users_Address, on_delete=models.CASCADE)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)  # Payment method field
     cartitems = models.ManyToManyField('OrderItem', blank=True)
-    order_number = models.CharField(max_length=100, unique=True,default='000000')
+    order_number = models.CharField(max_length=100, unique=True,default='000000') 
     order_notes=models.TextField(max_length=255,default='no message')
   
 
@@ -146,7 +146,7 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     orders = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='orderitems',default=1)
     unique_order_number = models.CharField(max_length=255,default='0000')  # Add this field to store the unique order number for the product
-
+    order_date = models.DateTimeField(auto_now_add=True, null=True)
     def __str__(self):
         # Check if the product attribute is not None before accessing its properties
         if self.product:
@@ -204,3 +204,10 @@ class Product_Offer(models.Model):
 
     def __str__(self):
         return f"{self.product} - {self.offer_type} - {self.discount_value}"
+    
+
+class Message(models.Model):
+    user =models.ForeignKey(Custom_users,on_delete=models.CASCADE)
+    message=models.TextField(max_length=255,null=True)
+    date = models.DateField()
+

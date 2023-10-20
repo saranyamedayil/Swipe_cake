@@ -1,4 +1,4 @@
-{% extends 'index.html' %} 
+{% extends 'indexusers_base.html' %} 
 {% load static %}
 {% block title %}Swipe_cake|Chocolates {% endblock %}
 {% block content %}
@@ -71,15 +71,7 @@
                         <li class="active"><a href="">Home</a></li>
                         <li><a href="#">About</a></li>
                         <li><a href="#">Shop</a></li>
-                        <li><a href="#">Registration</a>
-                            <ul class="dropdown">
-                                <li><a href="">Online Class</a></li>
-                                <li><a href="">Offline Class</a></li>
-                             
-                                {% comment %} <li><a href="./Class.html">Class</a></li>
-                                <li><a href="./blog-details.html">Blog Details</a></li> {% endcomment %}
-                            </ul>
-                        </li>
+                      
                         
                         <li><a href="">Contact</a></li>
                         <li><a href="User_login" class="no-message">login</a></li>
@@ -438,25 +430,6 @@
 
 {% endblock content %}
 {% block scripts %}
-<script>
-    {% for msg in messages %}
-    // Add a click event listener to the document
-    document.addEventListener('click', function (event) {
-        const clickedElement = event.target;
 
-        // Check if the clicked element is not the login or signup button
-        if (!clickedElement.classList.contains('no-message')) {
-            // Display a SweetAlert message when the document is clicked
-            Swal.fire({
-                icon: 'info',
-                title: 'Warning',
-                text: '{{ msg }}',
-                showConfirmButton: false,
-                timer: 2000, // Set the timer (in milliseconds) to automatically close the alert
-            });
-        }
-    });
-    {% endfor %}
-</script>
 
 {% endblock scripts %}

@@ -18,6 +18,14 @@
                     <div class="col-12">
                       <div class="d-flex align-items-center align-self-start">
                         <h3 class="mb-0">COUPONS</h3>
+                        <ul class="navbar-nav w-50 mx-5">
+                          <li class="nav-item w-50">
+                            <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search" method='GET' action="{% url 'coupon_search' %}">{% csrf_token %}
+                              <input type="text" class="form-control" placeholder="Search coupon" name='q'>
+                              <button class="btn btn-primary mx-2" type="submit"> Search</button>
+                            </form>
+                          </li>
+                        </ul>
                         <a href="{% url 'Add_coupons' %}" class='btn btn-success ml-auto'>Add COUPONS</a>
                        
                       </div> 

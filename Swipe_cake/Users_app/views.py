@@ -22,6 +22,15 @@ from django.views.decorators.csrf import csrf_protect
 
 
 
+from django.utils import timezone
+
+
+import uuid
+
+
+
+
+
 # Create your views here.
 def Users_homebefore(request):
     messages.error(request, 'please login your account')
@@ -529,7 +538,9 @@ def orderstatus_search(request):
             Q(order_number__icontains=q) |
             Q(orderitems__product__product_name__icontains=q) |
             Q(order_date__icontains=q) |
-            Q(payment_method__icontains=q)
+            Q(payment_method__icontains=q)|
+            Q(status__icontains=q)
+
         )
         orders = Order.objects.filter(multiple_s).distinct()
 
@@ -539,19 +550,99 @@ def orderstatus_search(request):
     }
     return render(request, "Admin_Orderstatus.html", context)
 
-    
+def category_search(request):
+    if 'q' in request.GET:
+        q = request.GET['q']
+        multiple_s = Q(
+            Q(category_name__icontains=q) 
 
-    
+        )
+
+    category=Product_Category.objects.filter(multiple_s).distinct()
+    context={
+        'category':category
+    }
+
+    return render(request,'Product_category.html',context)
+
+
+def coupon_search(request):
+    if 'q' in request.GET:
+        q = request.GET['q']
+        multiple_s = Q(
+            Q(code__icontains=q) |
+            Q(discount_type__icontains=q) |
+            Q(discount_value__icontains=q) 
+           
+
+
+        )
+
+    coupons=Coupon.objects.filter(multiple_s).distinct()
+    context={
+        'coupons':coupons
+    }
+
+    return render(request,'Admin_coupons.html',context)
+
+
+def home_search(request):
+
+    if 'q' in request.GET:
+        q = request.GET['q']
+        multiple_s = Q(
+            Q(product_name__icontains=q) |
+            
+            Q(product_price__icontains=q) 
+
+        )
+    products=Product_Details.objects.filter(multiple_s).distinct()
+   
+    context={
+        'product':products,
+        
+    }
+
+
+    return render(request,'home_after.html',context)
+
+
+def messagess(request):
+    messages=Message.objects.all()
+   
+   
+
+    return render(request,'home_after.html', {'messages': messages})
 
 #??????????????????????????????????????  products details based codes in admin side ??????????????????????????????????
 
 
 
 def Product_Details_all(request):
-    products ={
-        'product':Product_Details.objects.all()
-    }
+    products=Product_Details.objects.all()
     
+     # Specify the number of items per page
+    items_per_page = 10  # You can adjust this value as needed
+    
+    # Create a Paginator instance
+    paginator = Paginator(products, items_per_page)
+    
+    # Get the current page number from the request's GET parameters
+    page = request.GET.get('page')
+    
+    try:
+        # Get the corresponding page of orders
+        products = paginator.get_page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver the first page.
+        products = paginator.get_page(1)
+    except EmptyPage:
+        # If page is out of range, deliver the last page of results.
+        products = paginator.get_page(paginator.num_pages)
+
+    products ={
+        'product':products
+    }
 
     return render(request,'Product_details.html',products)
 
@@ -801,7 +892,7 @@ class ProductCategoryView(ListView):
                 context['cart_total'] = total  # Add 'cart_total' to the context
                 context['cart_count'] = cart_count
                 
-
+        context['username'] = username
         context['category_name'] = category_name
         return context
 
@@ -858,6 +949,9 @@ def view_cart(request):
 
         subtotal_dict = {}
         total = Decimal(0)
+        cart_count = 0
+
+        total,cart_count = calculate_cart_total(user)
       
 
         # # Remove the discount_amount from the session
@@ -871,10 +965,10 @@ def view_cart(request):
             category_name = item.product.product_category.category_name
             subtotal_dict[category_name] = subtotal_dict.get(category_name, 0) + item_total
 
-            total += item_total
+            # total += item_total
+        
 
-
-        return render(request, 'shoping-cart.html', {'cart_items': cart_items, 'subtotal_dict': subtotal_dict, 'cart_total': total})
+        return render(request, 'shoping-cart.html', {'cart_items': cart_items, 'subtotal_dict': subtotal_dict, 'cart_total': total,'cart_count':cart_count,'username':username})
     else:
         messages.warning(request, 'Please log in to view your cart.')
         return redirect('login')
@@ -929,7 +1023,7 @@ def about(request):
     
         
 
-    return render(request, 'about.html', {'cart_total': total,'cart_count': cart_count})
+    return render(request, 'about.html', {'cart_total': total,'cart_count': cart_count,'username':username})
 
 
 
@@ -945,7 +1039,7 @@ def contact(request):
         user = Custom_users.objects.get(username=username)
         total,cart_count = calculate_cart_total(user)
 
-    return render(request,'contact.html',{'cart_total': total,'cart_count': cart_count})
+    return render(request,'contact.html',{'cart_total': total,'cart_count': cart_count,'username':username})
 
 
 
@@ -999,7 +1093,7 @@ def View_userswishlist(request):
         return redirect(Users_login)
     
 
-    return render(request,'User_wishlist.html',{'wishlist':wishlist_items,'cart_total': total,'cart_count': cart_count})
+    return render(request,'User_wishlist.html',{'wishlist':wishlist_items,'cart_total': total,'cart_count': cart_count,'username':username})
 
 
 def delete_from_wishlist(request, item_id):
@@ -1038,7 +1132,9 @@ def product_described(request,product_id):
         'product': product,
         'related_products': related_products,
         'cart_total': total,
-        'cart_count': cart_count
+        'cart_count': cart_count,
+        'username':username
+
     }
      # Fetch product offer
         try:
@@ -1068,11 +1164,12 @@ def get_related_products(product_id):
 #>>>>>>>>>>>>>>>>>>>>>>>>>> checkout / adding coupons >>>>>>>>>>>>>>>>>>>>>>>>
 
 
+
 def Product_checkout(request):
     username = request.session.get('username')
-    cart_count = 0  # Default cart count
+    cart_count = 0
     discount_amount = 0
-    applied_coupon = None  # Variable to store applied coupon
+    applied_coupon = None
     Ct_discount_amount = 0
     pddiscount_amount = 0
 
@@ -1080,97 +1177,71 @@ def Product_checkout(request):
         user = Custom_users.objects.get(username=username)
         cart_items = CartItem.objects.filter(user=user)
         subtotal_dict = {}
-        total, cart_count = calculate_cart_total(user)  # Calculate the cart total and count
+        total, cart_count = calculate_cart_total(user)  # Implement calculate_cart_total
 
-        # Convert the Decimal total to a float and format it as needed
-        total_float = float(total)
-        total_float = Decimal(str(total)) 
+        # Initialize the total_float as the initial total
+        total_float = Decimal(str(total))
 
         if request.method == 'POST':
             coupon_code = request.POST.get('coupon_code')
 
-            print(coupon_code,'///////////////////////////////////////')
             try:
                 coupon = Coupon.objects.get(code=coupon_code)
-                
 
-                if coupon.is_valid():  # Assume you have an 'is_valid' method in your Coupon model
-                    if total_float >500:
-                        total_float = Decimal(str(total))  # Convert float to Decimal
-                        discount_amount = apply_coupon_discount(coupon, total)
-                        print(discount_amount,'//////////////////////////////////')
-                        total_float -= discount_amount  # Deduct the discount amount from the total
-                        print(total_float,'/////////////////////////////////////')
-                        applied_coupon = coupon  # Store the applied coupon
-                        print(applied_coupon,'...................................')
-                        request.session['coupon_code'] = coupon.code
-
-                        messages.success(request, 'Coupon applied successfully.')
-                    else:
-                        messages.error(request,"your order lessthan 500 coupon canot be apply")
+                if coupon.is_valid() and total_float > 500:
+                    discount_amount = apply_coupon_discount(coupon, total_float)
+                    total_float -= discount_amount
+                    applied_coupon = coupon
+                    request.session['coupon_code'] = coupon.code
+                    request.session['total_float'] = float(total_float)
+                    messages.success(request, 'Coupon applied successfully.')
                 else:
-                    messages.error(request, 'Coupon has expired or is not yet valid.')
+                    messages.error(request, 'Invalid coupon or order less than 500.')
 
             except Coupon.DoesNotExist:
                 messages.error(request, 'Invalid coupon code')
 
-        # Fetch and apply category-wise offers and product-wise offers
         for item in cart_items:
             category = item.product.product_category
 
-            # Category-wise offer
             try:
                 category_offer = Category_Offer.objects.get(category=category, expiration_date__gte=timezone.now().date(), is_active=True)
-                print(category_offer,'////////////////////////////////')
-                print(category_offer.category)
-                print(category_offer.is_active)
 
-                # Apply category-wise offer based on offer type (percentage or fixed)
                 if category_offer.offer_type == 'percentage':
                     Ct_discount_amount += (category_offer.discount_value / 100) * item.product.product_price * item.quantity
-                    print(Ct_discount_amount,'///////////////////')
                 elif category_offer.offer_type == 'fixed':
                     Ct_discount_amount += category_offer.discount_value
 
-                # Store the applied offer in the CartItem object for display in the template
                 item.category_offer = category_offer
 
             except Category_Offer.DoesNotExist:
-                pass  # No category-wise offer for this category
+                pass
 
-            # Product-wise offer
             product = item.product
             try:
                 product_offer = Product_Offer.objects.get(product=product, expiration_date__gte=timezone.now().date(), is_active=True)
-                print(product_offer, '2222222222222222222222222222222222222')
-                print(product_offer.is_active)
 
-                # Apply product-wise offer based on offer type (percentage or fixed)
                 if product_offer.offer_type == 'percentage':
                     pddiscount_amount += product.product_price * item.quantity * (product_offer.discount_value / 100)
                 elif product_offer.offer_type == 'fixed':
                     pddiscount_amount += product_offer.discount_value * item.quantity
 
-                # Store the applied offer in the CartItem object for display in the template
                 item.product_offer = product_offer
 
             except Product_Offer.DoesNotExist:
-                pass  # No product-wise offer for this product
+                pass
 
             item_total = item.quantity * item.product.product_price
 
-            if item.product.product_category.category_name in subtotal_dict:
-                subtotal_dict[item.product.product_category.category_name] += item_total
-            else:
-                subtotal_dict[item.product.product_category.category_name] = item_total
+            category_name = item.product.product_category.category_name
+            subtotal_dict[category_name] = subtotal_dict.get(category_name, 0) + item_total
 
         # Deduct category-wise and product-wise offers from the total
-        
         total_float -= Decimal(str(Ct_discount_amount))
-        print(total_float,'decucted category offer')
         total_float -= Decimal(str(pddiscount_amount))
-        print(total_float,'deducted product offer')
-        coupon=Coupon.objects.all()
+        request.session['total_float'] = float(total_float)
+        coupon = Coupon.objects.all()
+
     return render(request, 'product_checkout.html', {
         'cart_items': cart_items,
         'subtotal_dict': subtotal_dict,
@@ -1181,8 +1252,10 @@ def Product_checkout(request):
         'applied_coupon': applied_coupon,
         'Ct_discount_amount': Ct_discount_amount,
         'pddiscount_amount': pddiscount_amount,
-        'available_coupons':coupon
+        'available_coupons': coupon,
+        'username':username
     })
+
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< applying coupon discounts >>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -1269,7 +1342,7 @@ def New_address(request):
         user=Custom_users.objects.get(username=username)
         total,cart_count = calculate_cart_total(user)
 
-    return render(request,'add_address.html',{'cart_total': total,'cart_count': cart_count})
+    return render(request,'add_address.html',{'cart_total': total,'cart_count': cart_count,'username':username})
 
 
 def save_address(request):
@@ -1358,24 +1431,21 @@ def get_saved_addresses(request):
 
 
 
-
 def place_order(request):
     if request.method == 'POST':
         selected_address_details = request.POST.get('saved-address')
         selected_payment_method = request.POST.get('payment-method')
         username = request.session.get('username')
         order_notes = request.POST.get('order_notes', '')
-
+        total_float = request.session.get('total_float')
 
         try:
             user = Custom_users.objects.get(username=username)
             address = Users_Address.objects.get(id=selected_address_details)
 
-            # Use atomic transaction to ensure consistency
             with transaction.atomic():
                 # Create a new order instance
-                
-                unique_order_number = str(uuid.uuid4())[:8]  # Adjust the length of the order number as needed
+                unique_order_number = str(uuid.uuid4())[:8]
                 new_order = Order(
                     order_number=unique_order_number,
                     user=user,
@@ -1383,96 +1453,62 @@ def place_order(request):
                     payment_method=selected_payment_method,
                     order_notes=order_notes 
                 )
+
                 if selected_payment_method is None:
-            
                     messages.warning(request, 'Please select a payment method.')
                     return redirect('Product_checkout')
 
-                
                 new_order.save()
 
                 # Clear the existing cartitems associated with the user's order
                 new_order.cartitems.clear()
 
-                # Create order items and associate them with the order
-                total_amount = 0  # To calculate the total amount for Razorpay payment
+                total_amount_in_paise = int(total_float * 100)  # Convert total_float to paise
+
                 for cart_item in CartItem.objects.filter(user=user):
                     order_item = OrderItem(
                         product=cart_item.product,
                         quantity=cart_item.quantity,
                         price=cart_item.product.product_price * cart_item.quantity,
-                        orders=new_order,  # Set the order field to the new_order instance
+                        orders=new_order,
                     )
                     order_item.save()
-
-                    # Add the order_item to the new_order's cartitems
                     new_order.cartitems.add(order_item)
 
-                    # Calculate the total amount for Razorpay payment
-                    total_amount += int(cart_item.product.product_price * cart_item.quantity * 100)
-
-                # If the selected payment method is 'OnlinePayment', initiate Razorpay payment
                 if selected_payment_method == 'OnlinePayment':
                     for order_item in new_order.cartitems.all():
                         product = order_item.product
                         if product.product_stock < order_item.quantity:
-                            messages.error(request,'out of stock')
-
+                            messages.error(request, 'Out of stock')
                         else:
-                            # Initialize Razorpay client with your API keys
                             razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-                            razorpay_client = razorpay.Client(
-                                            auth=(
-                                                getattr(settings, 'RAZORPAY_KEY_ID', ''),
-                                                getattr(settings, 'RAZORPAY_KEY_SECRET', ''),
-                                            )
-                                        )
-
-
-                            # Create a Razorpay order
-                            razorpay_order = razorpay_client.order.create({'amount': total_amount, 'currency': 'INR'})
+                            razorpay_order = razorpay_client.order.create({'amount': total_amount_in_paise, 'currency': 'INR'})
 
                             return render(request, 'razorpay.html', {'order': new_order, 'razorpay_order': razorpay_order})
 
-                # If the selected payment method is not 'OnlinePayment', save the order
                 new_order.save()
 
-                # # Deduct product quantities
-                # for order_item in new_order.cartitems.all():
-                #     product = order_item.product
-                #     product.product_stock -= order_item.quantity
-                #     product.save()
-                
-                # Check product stock availability
                 for order_item in new_order.cartitems.all():
                     product = order_item.product
                     if product.product_stock >= order_item.quantity:
-                        # Deduct product quantity only if stock is sufficient
                         product.product_stock -= order_item.quantity
                         product.save()
                     else:
-                        # If stock is insufficient, handle the situation accordingly
                         messages.warning(request, f"Insufficient stock for product {product.product_name}")
                         new_order.delete()
-                        return redirect(Product_checkout)
+                        return redirect('Product_checkout')
 
-
-                # Clear the user's cart after placing the order
                 CartItem.objects.filter(user=user).delete()
 
                 return render(request, 'place_order.html', {'order': new_order})
 
         except Custom_users.DoesNotExist:
-            # Handle the case where the user does not exist
-            # You might want to redirect to an error page or handle it in another way
             pass
         except Users_Address.DoesNotExist:
-            # Handle the case where the address does not exist
-            # You might want to redirect to an error page or handle it in another way
             pass
 
-    # If the request method is not POST or there are issues with the data, redirect to the checkout page
     return redirect('Product_checkout')
+
 
 def place_order_success(request):
    
@@ -1487,7 +1523,7 @@ def place_order_success(request):
 
     # You can add additional logic or data fetching here if needed
 
-    return render(request, 'place_order.html', {'order': order})
+    return render(request, 'place_order.html', {'order': order,'username':username})
 
 
 
@@ -1497,11 +1533,29 @@ def place_order_success(request):
 
 
 def Admin_orderstatus(request):
-    order=Order.objects.all()
+    orders=Order.objects.all()
     orderitems=OrderItem.objects.all()
+    # Specify the number of items per page
+    items_per_page = 10  # You can adjust this value as needed
+    
+    # Create a Paginator instance
+    paginator = Paginator(orders, items_per_page)
+    
+    # Get the current page number from the request's GET parameters
+    page = request.GET.get('page')
+    
+    try:
+        # Get the corresponding page of orders
+        orders = paginator.get_page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver the first page.
+        orders = paginator.get_page(1)
+    except EmptyPage:
+        # If page is out of range, deliver the last page of results.
+        orders = paginator.get_page(paginator.num_pages)
     # Create a context dictionary to pass data to the template
     context = {
-        'orders': order,
+        'orders': orders,
         'order_items': orderitems,
     }
 
@@ -1586,26 +1640,7 @@ def delete_address(request, address_id):
 
 
 
-def shopitems(request):
-    # Default values for unauthenticated users
-    total = Decimal(0)
-    cart_count = 0
 
-    username = request.session.get('username')
-
-    if username:
-        user = get_object_or_404(Custom_users, username=username)
-        total, cart_count = calculate_cart_total(user)
-
-    products = Product_Details.objects.all()
-
-    context = {
-        'products': products,
-        'cart_total': total,
-        'cart_count': cart_count
-    }
-
-    return render(request, 'products.html', context)
     
 
 
@@ -1616,6 +1651,7 @@ def order_details(request):
 
     context = {
         'orders': orders,
+        'username':username
     }
 
     return render(request, 'order_details.html', context)
@@ -1640,11 +1676,13 @@ def cancel_order(request, order_id):
 
 
 def delete_orders(request):
+    username = request.session.get('username')  # Assuming the user is logged in
+   
     # Get orders with the status "cancelled"
     cancelled_orders = Order.objects.filter(status='Cancelled')
 
     # Pass the cancelled orders to the template
-    context = {'cancelled_orders': cancelled_orders}
+    context = {'cancelled_orders': cancelled_orders,'username':username}
     
 
     return render(request, "Delete_orders.html",context)
@@ -1803,31 +1841,26 @@ from xhtml2pdf import pisa
 from io import BytesIO
 from django.template import Context
 
-def generate_pdf(request, order_id):
-    try:
-        order = Order.objects.get(id=order_id)
-    except Order.DoesNotExist:
-        return HttpResponse("Order not found.", status=404)
+from io import BytesIO
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from .models import Order, OrderItem
 
-    # Fetch order items for the given order
-    order_items = OrderItem.objects.filter(orders=order)
+def generate_pdf(request,order_id):
+    # Retrieve the order or return a 404 response if it doesn't exist
+    order = get_object_or_404(Order, id=order_id)
+    print(order_id,'////////////////////////')
 
+    # Retrieve order items for the given order
+    order_items = OrderItem.objects.filter(order=order)
 
-
-    # Create a file-like buffer to receive PDF data.
-    buffer = BytesIO()
-
-    # Create the PDF object, using the buffer as its "file."
+    # Render the PDF content
     pdf_content = render_to_pdf('invoice_template.html', {'order': order, 'order_items': order_items})
 
     if pdf_content:
-        buffer.write(pdf_content)
-
-        # Set the buffer position to the start to ensure the entire content is written to the response
-        buffer.seek(0)
-
-        # Create a response with PDF content
-        response = HttpResponse(buffer, content_type='application/pdf')
+        # Create an HttpResponse with the PDF content
+        response = HttpResponse(pdf_content, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="order_invoice_{order_id}.pdf"'
         return response
 
@@ -1837,17 +1870,21 @@ def render_to_pdf(template_path, context):
     template = get_template(template_path)
     html = template.render(context)
     result = BytesIO()
+
+    # Generate the PDF using pisa.pisaDocument
     pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
-    
+
     if not pdf.err:
         return result.getvalue()
-    
-    return None
+    else:
+        # You may want to log or handle the error here
+        print("PDF generation error:", pdf.err)
+        return None
+
 
 
   
 #>>>>>>>>>>>>>>>>>. admin sales report >>>>>>>>>>>>>>>>>>>>>>>>
-
 
 
 from django.db.models import Sum
@@ -1856,24 +1893,39 @@ from django.template.loader import render_to_string
 from reportlab.pdfgen import canvas
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
+import datetime
+import pytz
+from django.utils import timezone
 
-
-
-# def sales_report(request):
-#     # Query sales data
-#     sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
-
-#     return render(request, 'Adminsales_report.html', {'sales_data': sales_data})
 
 def sales_report(request):
-    # Query sales data
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    print("Start Date:", start_date)
+    print("End Date:", end_date)
+
     sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
- 
+    if start_date and end_date:
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        start_date = datetime.datetime.combine(start_date, datetime.time.min, tzinfo=pytz.UTC)
+        end_date = datetime.datetime.combine(end_date, datetime.time.max, tzinfo=pytz.UTC)
+        print("Applying Date Filter")
+        sales_data = sales_data.filter(order__order_date__range=[start_date, end_date])
+        print(sales_data)
+
+
+    sales_data = sales_data.annotate(total_sales=Sum('quantity'))
+
     return render(request, 'Adminsales_report.html', {'sales_data': sales_data})
 
 
 
-def generate_pdf(sales_data):
+
+
+
+def generate_pdfdata(sales_data):
     buffer = BytesIO()
 
     # Create the PDF object using BytesIO as its "file"
@@ -1923,7 +1975,7 @@ def download_sales_report(request):
     sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
 
     # Generate PDF content
-    pdf_buffer = generate_pdf(sales_data)
+    pdf_buffer = generate_pdfdata(sales_data)
 
     # Create the HttpResponse object with the appropriate PDF headers.
     response = HttpResponse(content_type='application/pdf')
@@ -1933,3 +1985,47 @@ def download_sales_report(request):
     response.write(pdf_buffer.getvalue())
 
     return response
+
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import render
+
+def shopitems(request):
+
+    total = Decimal(0)
+    cart_count = 0
+
+    username = request.session.get('username')
+
+    if username:
+        user = get_object_or_404(Custom_users, username=username)
+        total, cart_count = calculate_cart_total(user)
+
+ 
+    # Assuming you already have a queryset of products named 'product_list'
+    all_products = Product_Details.objects.all().order_by('product_name')
+
+    # Number of products to be displayed per page
+    items_per_page = 12  
+    # Create a Paginator instance
+    paginator = Paginator(all_products, items_per_page)
+
+    page = request.GET.get('page')  # Get the current page number from the request
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        # If the page is not an integer, set to the first page
+        products = paginator.page(1)
+    except EmptyPage:
+        # If the page is out of range (e.g., 9999), deliver the last page
+        products = paginator.page(paginator.num_pages)
+    context = {
+        
+        'cart_total': total,
+        'cart_count': cart_count,
+        'products': products
+    }
+
+
+    return render(request, 'products.html', context)
+
