@@ -15,9 +15,9 @@
                     <div class="row d-flex justify-content-center">
                         <div class="col-lg-4 col-md-7">
                             <div class="map__inner">
-                                <h6>COlorado</h6>
+                                <h6>SWIPE_CAKE</h6>
                                 <ul>
-                                    <li>1000 Lakepoint Dr, Frisco, CO 80443, USA</li>
+                                    <li>1000 Lakepoint Dr, Thiruvanathapuram, KL 80443, INDIA</li>
                                     <li>Sweetcake@support.com</li>
                                     <li>+1 800-786-1000</li>
                                 </ul>
@@ -33,11 +33,11 @@
                 <div class="row">
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="contact__address__item">
-                            <h6>san bernardino</h6>
+                            <h6>Thiruvanathapuram</h6>
                             <ul>
                                 <li>
                                     <span class="icon_pin_alt"></span>
-                                    <p>795 W 5th St, San Bernardino, CA 92410, USA</p>
+                                    <p>795 W 5th St,Thiruvanathapuram,695587, INDIA</p>
                                 </li>
                                 <li><span class="icon_headphones"></span>
                                     <p>+1 800-786-1000</p>
@@ -50,11 +50,11 @@
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="contact__address__item">
-                            <h6>Los angeles</h6>
+                            <h6>Ernakulam</h6>
                             <ul>
                                 <li>
                                     <span class="icon_pin_alt"></span>
-                                    <p>639 S Spring St, Los Angeles, CA 90014, USA</p>
+                                    <p>639 S Spring St, Ernakulam, kl 90014, INDIA</p>
                                 </li>
                                 <li><span class="icon_headphones"></span>
                                     <p>+1 213-612-3000</p>
@@ -67,11 +67,11 @@
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="contact__address__item">
-                            <h6>san bernardino</h6>
+                            <h6>kollam</h6>
                             <ul>
                                 <li>
                                     <span class="icon_pin_alt"></span>
-                                    <p>1000 Lakepoint Dr, Frisco, CO 80443, USA</p>
+                                    <p>1000 Lakepoint Dr, kollam, KL 80443, INDIA</p>
                                 </li>
                                 <li><span class="icon_headphones"></span>
                                     <p>+1 800-786-1000</p>
@@ -98,16 +98,17 @@
                 </div>
                 <div class="col-lg-8">
                     <div class="contact__form">
-                        <form action="#">
+                        <form action="{% url 'contact_us' %}" method="POST">
+                            {% csrf_token %}
                             <div class="row">
                                 <div class="col-lg-6">
-                                    <input type="text" placeholder="Name">
+                                    <input type="text" placeholder="Name" name='name'>
                                 </div>
                                 <div class="col-lg-6">
-                                    <input type="text" placeholder="Email">
+                                    <input type="email" placeholder="Email" name='email'>
                                 </div>
                                 <div class="col-lg-12">
-                                    <textarea placeholder="Message"></textarea>
+                                    <textarea placeholder="Message" name='text'></textarea>
                                     <button type="submit" class="site-btn">Send Us</button>
                                 </div>
                             </div>
@@ -122,3 +123,29 @@
 
 
 {% endblock content %}
+
+{% block scripts%}
+<script>
+    {% for msg in messages %}
+{% if msg.tags == 'error' %}
+    Swal.fire({
+        title: 'Error',
+        text: '{{ msg }}',
+        icon: 'error'
+    });
+{% elif msg.tags == 'success' %}
+    Swal.fire({
+        title: 'Success',
+        text: '{{ msg }}',
+        icon: 'success'
+    });
+{% else %}
+    Swal.fire({
+        title: 'Warning',
+        text: '{{ msg }}',
+        icon: 'warning'
+    });
+{% endif %}
+{% endfor %}
+</script>
+{% endblock scripts%}

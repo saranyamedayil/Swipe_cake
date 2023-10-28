@@ -4,7 +4,10 @@ from .views import ProductCategoryView
 
 
 
+
+
 urlpatterns = [
+  
     path("",views.Users_homebefore,name='homebefore'),
     path('User_signin',views.Users_signin,name='signin'),
     path('signin_resend_otp',views.signin_resend_otp,name='signin_resend_otp'),
@@ -53,6 +56,9 @@ urlpatterns = [
     path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
     # path('generate_pdf/<int:order_id>/', views.generate_pdf, name='generate_pdf'),
     path('generate_pdf/<int:order_id>/', views.generate_pdf, name='generate_pdf'),
+    # path('check_stock_status/<int:item_id>/', views.check_stock_status, name='check_stock_status'),
+    path('contact_us',views.contact_us,name='contact_us'),
+    path('feedback_submission',views.feedback_submission,name='feedback_submission'),
 
   
 
@@ -90,12 +96,16 @@ urlpatterns = [
     path('categoryoffer_disable/<int:category_offer_id>/',views.categoryoffer_disable,name='categoryoffer_disable'),
     path('sales-report/', views.sales_report, name='sales_report'),
     path('download_sales_report/', views.download_sales_report, name='download_sales_report'),
+    path('generate_sales_report_pdf',views.generate_sales_report_pdf,name='generate_sales_report_pdf'),
     path('orderstatus_search',views.orderstatus_search,name='orderstatus_search'),
     path('category_search',views.category_search,name='category_search'),
     path('coupon_search',views.coupon_search,name='coupon_search'),
     path('home_search',views.home_search,name='home_search'),
     path('messagess',views.messagess,name='messagess'),
-
+    path('dashboard',views.dashboard,name='dashboard'),
+    path('generate_sales_chart/',views.generate_sales_chart,name='generate_sales_chart'),
+    path('download_sales_chart',views.download_sales_chart,name='download_sales_chart'),
+    path('admin_usersmsg',views.admin_usersmsg,name='admin_usersmsg'),
     
 
 

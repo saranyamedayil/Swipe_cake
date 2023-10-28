@@ -75,7 +75,7 @@
                         
                         <li><a href="">Contact</a></li>
                         <li><a href="User_login" class="no-message">login</a></li>
-                        <li><a href="User_signin" class="no-message">signin</a></li>
+                        <li><a href="User_signin" class="no-message">sign up</a></li>
                     </ul>
                 </nav>
             </div>
@@ -209,140 +209,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="testimonial__slider owl-carousel">
-                <div class="col-lg-6">
-                    <div class="testimonial__item">
-                        <div class="testimonial__author">
-                            <div class="testimonial__author__pic">
-                                <img src="img/testimonial/ta-1.jpg" alt="">
-                            </div>
-                            <div class="testimonial__author__text">
-                                <h5>Kerry D.Silva</h5>
-                                <span>New york</span>
-                            </div>
-                        </div>
-                        <div class="rating">
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star-half_alt"></span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                        ut labore et dolore magna aliqua viverra lacus vel facilisis.</p>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="testimonial__item">
-                        <div class="testimonial__author">
-                            <div class="testimonial__author__pic">
-                                <img src="img/testimonial/ta-2.jpg" alt="">
-                            </div>
-                            <div class="testimonial__author__text">
-                                <h5>Kerry D.Silva</h5>
-                                <span>New york</span>
-                            </div>
-                        </div>
-                        <div class="rating">
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star-half_alt"></span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                        ut labore et dolore magna aliqua viverra lacus vel facilisis.</p>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="testimonial__item">
-                        <div class="testimonial__author">
-                            <div class="testimonial__author__pic">
-                                <img src="img/testimonial/ta-1.jpg" alt="">
-                            </div>
-                            <div class="testimonial__author__text">
-                                <h5>Ophelia Nunez</h5>
-                                <span>London</span>
-                            </div>
-                        </div>
-                        <div class="rating">
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star-half_alt"></span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                        ut labore et dolore magna aliqua viverra lacus vel facilisis.</p>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="testimonial__item">
-                        <div class="testimonial__author">
-                            <div class="testimonial__author__pic">
-                                <img src="img/testimonial/ta-2.jpg" alt="">
-                            </div>
-                            <div class="testimonial__author__text">
-                                <h5>Kerry D.Silva</h5>
-                                <span>New york</span>
-                            </div>
-                        </div>
-                        <div class="rating">
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star-half_alt"></span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                        ut labore et dolore magna aliqua viverra lacus vel facilisis.</p>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="testimonial__item">
-                        <div class="testimonial__author">
-                            <div class="testimonial__author__pic">
-                                <img src="img/testimonial/ta-1.jpg" alt="">
-                            </div>
-                            <div class="testimonial__author__text">
-                                <h5>Ophelia Nunez</h5>
-                                <span>London</span>
-                            </div>
-                        </div>
-                        <div class="rating">
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star-half_alt"></span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                        ut labore et dolore magna aliqua viverra lacus vel facilisis.</p>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="testimonial__item">
-                        <div class="testimonial__author">
-                            <div class="testimonial__author__pic">
-                                <img src="img/testimonial/ta-2.jpg" alt="">
-                            </div>
-                            <div class="testimonial__author__text">
-                                <h5>Kerry D.Silva</h5>
-                                <span>New york</span>
-                            </div>
-                        </div>
-                        <div class="rating">
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star"></span>
-                            <span class="icon_star-half_alt"></span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                        ut labore et dolore magna aliqua viverra lacus vel facilisis.</p>
-                    </div>
-                </div>
+      
             </div>
         </div>
     </div>
@@ -430,6 +297,25 @@
 
 {% endblock content %}
 {% block scripts %}
+<script>
+    {% for msg in messages %}
+    // Add a click event listener to the document
+    document.addEventListener('click', function (event) {
+        const clickedElement = event.target;
 
+        // Check if the clicked element is not the login or signup button
+        if (!clickedElement.classList.contains('no-message')) {
+            // Display a SweetAlert message when the document is clicked
+            Swal.fire({
+                icon: 'info',
+                title: 'Warning',
+                text: '{{ msg }}',
+                showConfirmButton: false,
+                timer: 2000, // Set the timer (in milliseconds) to automatically close the alert
+            });
+        }
+    });
+    {% endfor %}
+</script>
 
 {% endblock scripts %}

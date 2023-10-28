@@ -209,5 +209,10 @@ class Product_Offer(models.Model):
 class Message(models.Model):
     user =models.ForeignKey(Custom_users,on_delete=models.CASCADE)
     message=models.TextField(max_length=255,null=True)
-    date = models.DateField()
+    date = models.DateTimeField(auto_now_add=True)  # Automatically set the date on creation
 
+class Contact_with_us(models.Model):
+
+    name=models.CharField(max_length=10,null=False)
+    email=models.EmailField()
+    text=models.TextField(max_length=255)

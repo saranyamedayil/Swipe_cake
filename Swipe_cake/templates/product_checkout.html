@@ -44,7 +44,7 @@
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="breadcrumb__links">
-                        <a href="./index.html">Home</a>
+                        <a href="{% url 'homeafter' %}">Home</a>
                         <span>Checkout</span>
                        
                     </div>
@@ -103,16 +103,16 @@
                                 <!-- Address details will be displayed here when the checkbox is checked -->
                             </div>
                         </div>
-                        
+{% comment %}                         
                             <div class="checkout__input__checkbox">
                                 <label for="diff-acc">
                                     Note about your order, e.g, special note for delivery
                                     <input type="checkbox" id="diff-acc">
                                     <span class="checkmark"></span>
                                 </label>
-                            </div>
+                            </div> {% endcomment %}
                             <div class="checkout__input">
-                                <p>Order notes<span>*</span></p>
+                                <p>Order notes<span>*(optional)</span></p>
                                 <input type="text"
                                 placeholder="Notes about your order, e.g. special notes for delivery." name='order_notes'>
                             </div>
@@ -139,10 +139,8 @@
                                             <samp>{{forloop.counter}}</samp>
                                             
                                                 <samp style="margin-left: 1vw"> 
-                                                    {{item.product.product_name}} -{{item.quantity}}</samp>  
+                                                    {{item.product.product_name}} qty-{{item.quantity}}</samp>  
                                                     <span class="total-price">₹{{ item.product.product_price|mul:item.quantity }}</span>
-                                            
-                                            
                                                     </ul> 
                                         
                               
@@ -159,19 +157,30 @@
                                                 <li >Discount Amount: <span>₹{{ discount_amount }}</span></li>
                                                 
                                                 {% endif %}
-                                                {% for item in cart_items %}
+                                            
+                                            {% for item in cart_items %}
                                                 {% if item.product_offer %}
                                                 <p>Applied Offer: 
-                                                    <strong><br>  {{ item.product.product_name}} offer - ₹ {{ item.product_offer.discount_value }}</strong></p>
-                                                    <li >Discount Amount: <span>₹{{ pddiscount_amount }}</span></li>
+                                                    <strong><br>{{ item.product.product_name }} offer - ₹{{ item.product_offer.discount_value }}</strong>
+                                                </p>
+                                                <li>Discount Amount: <span>₹{{ pddiscount_amount }}</span></li>
                                                 {% endif %}
 
-                                                {% if item.category_offer %}
+                                                {% if item.category_offer and item.display_category_offer %}
                                                 <p>Applied Offer: 
-                                                    <strong><br>{{ item.product.product_category.category_name }} offer - {{ item.category_offer.discount_value|floatformat:0 }}%</p>
-                                                        <li >Discount Amount: <span>₹{{ Ct_discount_amount }}</span></li>
-                                            {% endif %}
+                                                    <strong><br>{{ item.product.product_category.category_name }} offer - {{ item.category_offer.discount_value|floatformat:0 }}%</strong>
+                                                </p>
+                                                <li>Discount Amount: <span>₹{{ Ct_discount_amount }}</span></li>
+                                                {% endif %}
                                             {% endfor %}
+
+                                                        
+                                        
+                                        
+                                        
+
+
+
                                             
                                            
                                                 <li>Total <span>₹{{ cart_total|floatformat:2 }}</span></li>
@@ -305,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const label = document.createElement('label');
 
                 label.textContent = `${address.first_name} ${address.last_name}, ${address.street_address},  ${address.apartment}, ${address.city}, ${address.state}, ${address.zipcode}, Phone: ${address.phone}, Email: ${address.email}`;
-
+              
                 label.setAttribute('for', `address-${address.id}`);
 
                 div.appendChild(checkbox);
@@ -360,11 +369,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to place the order with the selected address
     function placeOrder(selectedAddressDetails,selectedPaymentMethod) {
-        // Replace this with your logic to place the order using the selected address
-        // You can use selectedAddressDetails to get the necessary information
+       
         console.log('Placing order with the following address:', selectedAddressDetails);
         console.log('Placing order with the following address:', selectedPaymentMethod)
-        // Add your order placement logic here
+        
     }
 });
 

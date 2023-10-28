@@ -89,6 +89,7 @@
                     <div class="col-lg-12">
                         <div class="hero__text">
                             <h2>Explore our cake collection and let your taste buds dance with delight!</h2>
+                            
                             <form class="nav-link mt-5 mt-md-0 d-none d-lg-flex search" method='GET' action="{% url 'home_search' %}">{% csrf_token %}
                                 <input type="text" class="form-control" placeholder="Search products, price, etc." name='q'>
                                 <button class="btn btn-warning mx-2" type="submit">Search</button>
@@ -133,9 +134,16 @@
 <!-- Product Section Begin -->
 
 <section class="product spad">
+    
     <div class="container">
         <div class="row">
+            {% if no_items_message %}
+    <p class='text text-danger'>{{ no_items_message }}</p>
+    {% else %}
+            
             {% for p in product %}
+           
+            
             <div class="col-md-3">
                 <div class="product__item "> 
                     <div class="product__item__pic set-bg" data-setbg="{{ p.product_image.url }}">
@@ -159,7 +167,7 @@
                         </div>
                     </div>
                     <div class="product__item__text">
-                        <h6><a href="#">{{ p.product_name }}</a></h6>
+                        <h6><a href="{% url 'product_described' p.product_id %}">{{ p.product_name }}</a></h6>
                         
                         <div class="product__item__price">₹{{ p.product_price }}</div>
                         <div class="cart_add">
@@ -173,8 +181,11 @@
                     </div>
                 </div>
             </div>
+            
             {% endfor %}
+            {% endif %}
         </div>
+      
     </div>
 </section>
 
@@ -183,83 +194,6 @@
 
 <!-- Class Section End -->
 
-<!-- Team Section Begin -->
-{% comment %} <section class="team spad">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-7 col-md-7 col-sm-7">
-                <div class="section-title">
-                    <span>Our team</span>
-                    <h2>Sweet Baker </h2>
-                </div>
-            </div>
-            <div class="col-lg-5 col-md-5 col-sm-5">
-                <div class="team__btn">
-                    <a href="#" class="primary-btn">Join Us</a>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="team__item set-bg" data-setbg="img/team/team-1.jpg">
-                    <div class="team__item__text">
-                        <h6>Randy Butler</h6>
-                        <span>Decorater</span>
-                        <div class="team__item__social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                            <a href="#"><i class="fa fa-youtube-play"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="team__item set-bg" data-setbg="img/team/team-2.jpg">
-                    <div class="team__item__text">
-                        <h6>Randy Butler</h6>
-                        <span>Decorater</span>
-                        <div class="team__item__social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                            <a href="#"><i class="fa fa-youtube-play"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="team__item set-bg" data-setbg="img/team/team-3.jpg">
-                    <div class="team__item__text">
-                        <h6>Randy Butler</h6>
-                        <span>Decorater</span>
-                        <div class="team__item__social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                            <a href="#"><i class="fa fa-youtube-play"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="team__item set-bg" data-setbg="img/team/team-4.jpg">
-                    <div class="team__item__text">
-                        <h6>Randy Butler</h6>
-                        <span>Decorater</span>
-                        <div class="team__item__social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                            <a href="#"><i class="fa fa-youtube-play"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section> {% endcomment %}
-<!-- Team Section End -->
 
 <!-- Testimonial Section Begin -->
 <section class="testimonial spad">
@@ -269,12 +203,83 @@
                 <div class="section-title">
                     <span>Testimonial</span>
                     <h2>Our client say</h2>
+                
+            <div class="row">
+                
+                <div class="testimonial__slider owl-carousel">
+                    {% for m in mesg %}
+                    <div class="col-lg-6">
+                         
+                        <div class="testimonial__item">
+                            {% comment %} <div class="testimonial__author"> {% endcomment %}
+                                
+                                <div class="testimonial__author__text">
+                                    
+                                    <h5>{{m.user.username}}</h5>
+                                    <span>{{m.date}}</span>
+                               
+                            <div class="rating">
+                                <span class="icon_star"></span>
+                                <span class="icon_star"></span>
+                                <span class="icon_star"></span>
+                                <span class="icon_star"></span>
+                                <span class="icon_star-half_alt"></span>
+                            </div>
+                            <p>{{m.message}}</p>
+                        </div>
+                    </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    </div></div>
+        </div>
+    </div>
+                
+</div> 
+      
+    {% comment %} <div><h4>
+        <a href="{% url 'contact_us' %}" class='text text-decoration-none text-dark'>write your valuable feedback <span class='text text-primary'>here...</span> </a></h4>
+    </div> {% endcomment %}
+    <div>
+        <h4>
+            <a href="#" class="text text-decoration-none text-dark" data-toggle="modal" data-target="#feedbackModal">write your valuable feedback <span class="text text-primary">here...</span></a>
+        </h4>
+    </div>
+
+    <div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedbackModalLabel">Write Your Feedback</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'feedback_submission' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="name" class="col-form-label">Your Name:</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        {% comment %} <div class="form-group">
+                            <label for="email" class="col-form-label">Your Email:</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div> {% endcomment %}
+                        <div class="form-group">
+                            <label for="text" class="col-form-label">Your Feedback:</label>
+                            <textarea class="form-control" id="text" required name='feedback'></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Send Feedback</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    <div><h4>
-        <a href="" class='text text-decoration-none text-dark'>write your valuable feedback <span class='text text-primary'>here...</span> </a></h4>
     </div>
+      
 </section>
 <!-- Testimonial Section End -->
 

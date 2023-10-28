@@ -62,7 +62,7 @@
                                 <td>{{ p.product_name }}</td>
                                 <td>{{ p.product_category.category_name }}</td>
                                 {% comment %} <td>{{ p.product_category_id }}</td> {% endcomment %}
-                                <td>{{ p.product_stock }}</td>
+                                <td>{{ p.product_stock|floatformat:0 }}</td>
                                 <td>{{ p.product_price }}</td>
                                 <td><img src="{{ p.product_image.url }}" alt="{{ p.product_name }}" class="product-image"></td>
 
@@ -74,13 +74,13 @@
                                       <button type="submit" class="btn btn-danger ml-auto">Delete</button>
                                   </form>
                               </td>
-                              {% if messages %}
+                              {% comment %} {% if messages %}
                               <ul class="messages text-danger">
                                    {% for message in messages %}
                               {{ message }}
                                {% endfor %}
                                     </ul>
-                            {% endif %}
+                            {% endif %} {% endcomment %}
 
 
                               </tr>
@@ -97,6 +97,7 @@
     </div>
     <!-- page-body-wrapper ends -->
     
+  </div>
   </div>
   <div class="pagination">
     <span class="step-links">
@@ -116,3 +117,34 @@
     
 
   {% endblock content %}
+
+  {% block script %}
+  <script>
+  {% for msg in messages %}
+      {% if msg.tags == 'error' %}
+          Swal.fire({
+              title: 'Error',
+              text: '{{ msg }}',
+              icon: 'error'
+          });
+      {% elif msg.tags == 'success' %}
+          Swal.fire({
+              title: 'Success',
+              text: '{{ msg }}',
+              icon: 'success'
+          });
+      {% else %}
+          Swal.fire({
+              title: 'Warning',
+              text: '{{ msg }}',
+              icon: 'warning'
+          });
+      {% endif %}
+  {% endfor %}
+  </script>
+  {% endblock script %}
+  
+
+
+
+

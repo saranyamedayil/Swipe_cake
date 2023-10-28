@@ -56,6 +56,7 @@
         <div class="row">
             <div class="col-lg-8">
                 <div class="shopping__cart__table">
+                    {% if cart_items %}
                     <table>
                         <thead>
                             <tr>
@@ -101,7 +102,11 @@
                                 </td>
                                 <td class="cart__price" id="item_price" data-item-id="{{ item.id }}">₹{{ item.product.product_price }}</td>
                                 <td id="product_total_price" data-item-id="{{ item.id }}">₹<span class="product-total-price">{{ item.product.product_price|mul:item.quantity }}</span></td>
-                                <td class="cart__close"><a href="{% url 'delete_from_cart' item.id %}"><span class="icon_close"></span></a></td>
+                                {% comment %} <td class="cart__close"><a href="{% url 'delete_from_cart' item.id %}"><span class="icon_close"></span></a></td> {% endcomment %}
+                                <td class="cart__close">
+                                    <a href="#" data-item-id="{{ item.id }}" class="delete-item-link"><span class="icon_close"></span></a>
+                                </td>
+                                
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -112,7 +117,7 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-6">
                         <div class="continue__btn">
-                            <a href="{% url 'homeafter' %}">Continue Shopping</a>
+                            <a href="{% url 'shopitems' %}">Continue Shopping</a>
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-6">
@@ -122,28 +127,9 @@
                     </div>
                 </div>
             </div>
+            
             <div class="col-lg-4">
-                {% comment %} <div class="cart__discount">
-                    <h6>Discount codes</h6>
-                    <form action="{% url 'view_cart' %}" method='POST'>
-                       {% csrf_token %}
-                        <input type="text" placeholder="Coupon code" name='coupon_code'>
-                        <button type="submit">Apply</button>
-                    </form>
-                </div> {% endcomment %}
-                {% comment %} <div class="cart__total">
-                    <h6>Cart total</h6>
-                    <ul>
-                        {% for category, subtotal in subtotal_dict.items %}
-                            <li class="subtotal-item">{{ category }} Subtotal:</li>
-                            <li class="subtotal-amount">rs.{{ subtotal }}</li>
-                        {% endfor %}
-                        <li class="total-item">Total:</li>
-                        <li class="total-amount">rs.{{ cart_total }}</li>
-                    </ul>
-                    
-                    <a href="#" class="primary-btn">Proceed to checkout</a>
-                </div> {% endcomment %}
+            
                 <div class="cart__total">
                     <h6 style="text-align: left;">Cart total</h6>
                     <ul>
@@ -159,6 +145,7 @@
             {% endfor %}
             <li style="text-align: left; width: 50%; float: left;">Total:</li>
             <li style="text-align: right; width: 50%; float: right;">₹{{ cart_total }}</li>
+       
         </ul>                                                               
                     </ul>
                     <a href="{% url 'Product_checkout' %}" class="primary-btn {% if not cart_items %}disabled{% endif %}" id="proceed-to-checkout" style="clear: both;">Proceed to checkout</a>
@@ -166,6 +153,9 @@
             </div>
         </div>
     </div>
+    {% else %}
+                            <p class='text text-danger'>No items in your CART.</p>
+                        {% endif %}
 </section>
 <!-- Shopping Cart Section End -->
 
@@ -299,6 +289,65 @@ $(document).ready(function () {
     // Wait for the document to be ready
     // ... (rest of your existing code)
 });
+
+$(document).ready(function () {
+    // Add a click event listener to the delete links
+    $('.delete-item-link').click(function (event) {
+        event.preventDefault(); // Prevent the default action
+
+        const itemID = $(this).data('item-id');
+
+        // Show a SweetAlert confirmation dialog
+        Swal.fire({
+            title: 'Confirm Deletion',
+            text: 'Are you sure you want to remove this item from your cart?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // User confirmed, send an AJAX request to delete the item
+                const csrfToken = getCookie('csrftoken'); // Function to get the CSRF token
+                $.ajax({
+                    type: 'POST',
+                    url: `/delete_from_cart/${itemID}/`, // Replace with your actual URL
+                    data: { item_id: itemID },
+                    headers: { "X-CSRFToken": csrfToken }, // Include the CSRF token in headers
+                    success: function (data) {
+                        if (data.success) {
+                            // Handle success, e.g., update the cart
+                            location.reload();
+                            console.log("Success response:", data);
+                        } else {
+                            // Handle failure, e.g., show an error message
+                            
+                            location.reload();
+                            Swal.fire('success', 'item removed from the cart.', 'success');
+                            console.log("Error response");
+                        }
+                    },
+                    error: function () {
+                        // Handle AJAX error
+                        Swal.fire('Error', 'An error occurred during the request.', 'error');
+                    }
+                    
+                });
+            }
+        });
+    });
+});
+
+// Function to get the CSRF token from cookies
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+} 
+
+
+
+
 
 </script>
 

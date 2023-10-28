@@ -115,7 +115,7 @@
                                 
                                    
     
-                                    <p><strong>Username:</strong> {{ username.username }}</p>
+                                    <p><strong>Username:</strong> {{ username.username|upper }}</p>
                                      <p><strong>Phone Number:</strong> {{ username.phonenumber }}</p>
 
                                     {% comment %} <img class="big_img" src="{{ product.product_image.url }}" alt=""> {% endcomment %}
@@ -170,7 +170,7 @@
                                 <strong>
                                 <li><a href="{% url 'order_details'%}">order details </a></li>
                                 <li><a href="{% url 'delete_orders' %}">cancelled order </a></li>
-                                <li><a href="">track order </a></li>
+                               
                                 <li> <a href="{% url 'View_userswishlist' %}">view wishlist </a></li>
                                 <li><a href="{% url 'view_cart' %}">view cart </a></li>
                                 <li><a href="forgot_passwordverify">forgotten password </a></li>

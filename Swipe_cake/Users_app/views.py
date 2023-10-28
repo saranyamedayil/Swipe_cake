@@ -29,6 +29,11 @@ import uuid
 
 
 
+def custom_404_page(request, exception):
+    
+    return render(request,'404.html', status=404)
+
+
 
 
 # Create your views here.
@@ -110,7 +115,7 @@ def phone_verification(request):
             request.session['otp'] = otp
             request.session['phonenumber'] = phonenumber
             
-            send_otp_phone(otp)
+            send_otp_phone(otp,phonenumber)
             ph = {'phone': phonenumber}
 
             return render(request,'verifyotp_newpass.html',ph)
@@ -146,6 +151,7 @@ def verifyotp_newpass(request):
                 return redirect('new_password')  # Redirect to creating a new password
             else:
                 messages.error(request, 'Invalid OTP')
+                
                 return render(request, 'verifyotp_newpass.html')
 
         except Custom_users.DoesNotExist:
@@ -219,7 +225,7 @@ def resend_sms(request):
         user.save()
 
         # Send the new OTP via SMS
-        send_otp_phone(new_otp)
+        send_otp_phone(new_otp,phonenumber)
 
         messages.success(request, 'OTP resent successfully')
     except Custom_users.DoesNotExist:
@@ -255,7 +261,7 @@ def sent_otp(request):
             messages.error(request, "All fields are required")
         else:
             if password != confirmpass:
-                messages.error(request, "Passwords don't match")
+                messages.error(request, "Passwords NOT matching")
             elif len(phonenumber) != 10 or not phonenumber.isdigit():
                 messages.error(request, "Invalid phone number")
             elif Custom_users.objects.filter(username=username).exists():
@@ -267,17 +273,17 @@ def sent_otp(request):
                     user = Custom_users(username=username, phonenumber=phonenumber, password=password)
                     user.save()
                     # Generate and send OTP only if the form is valid
-                    otp = random.randint(100000, 999999)
-                    otp_to_ph = str(otp)
-                    print(".............................", otp_to_ph)
-                    send_otp_phone(otp_to_ph)
+                    otp = generate_otp()
+                    
+                    
+                    send_otp_phone(otp,phonenumber)
                     user.password = password 
                     
                     user.save()
 
                     # Save user information in the session
                     request.session['phonenumber'] = phonenumber
-                    request.session['otp'] = otp_to_ph
+                    request.session['otp'] = otp
                     request.session['username'] = username
 
                     # Send OTP via SMS or other methods here if needed
@@ -317,7 +323,7 @@ def verify_otp(request):
                 return redirect('login')  # Redirect to the login page upon successful OTP verification
             else:
                 messages.error(request, 'Invalid OTP')
-                # user_obj.delete()
+                user_obj.delete()
                 return render(request, 'enter_otp.html')
 
         except Custom_users.DoesNotExist:
@@ -348,7 +354,7 @@ def signin_resend_otp(request):
         user_obj.save()
 
         # Send the new OTP via SMS (uncomment the line below once you have the send_otp_phone function)
-        send_otp_phone(new_otp)
+        send_otp_phone(new_otp,phonenumber)
 
         messages.success(request, 'OTP resent successfully')
     except Custom_users.DoesNotExist:
@@ -363,6 +369,56 @@ def signin_resend_otp(request):
 
 
 
+# @never_cache
+# def Users_homeafter(request):
+#     context = {}
+
+#     product = Product_Details.objects.all()
+#     context['product'] = product
+
+#      # Retrieve all categories
+#     categories = Product_Category.objects.all()
+#     context['categories'] = categories  # Add 'categories' to the context
+
+#     if 'username' in request.session:
+#         username = request.session.get('username')
+
+#         if username:
+#             # Get the user object associated with the username
+#             user = Custom_users.objects.get(username=username)
+
+#             cart_items = CartItem.objects.filter(user=user)
+
+#             subtotal_dict = {}
+#             total = Decimal(0)
+#             cart_count = 0  # Initialize cart count
+
+#             for item in cart_items:
+#                 # Calculate the total price for each cart item
+#                 item_total = item.quantity * item.product.product_price
+#                 if item.product.product_category.category_name in subtotal_dict:
+#                     # If it exists, add the item total to the existing subtotal
+#                     subtotal_dict[item.product.product_category.category_name] += item_total
+#                 else:
+#                     # If it doesn't exist, create a new entry
+#                     subtotal_dict[item.product.product_category.category_name] = item_total
+
+#                 # Add item total to the total
+#                 total += item_total
+#                 cart_count += item.quantity
+                
+
+#             # Add 'cart_total' to the context
+#             context['cart_total'] = total
+#             context['cart_count'] = cart_count
+#             context['username'] = username
+
+
+#             return render(request, "home_after.html", context)  # Pass the context with 'cart_total'
+    
+#     return redirect(Users_login)
+from django.core.exceptions import ObjectDoesNotExist  # Import the exception
+
 @never_cache
 def Users_homeafter(request):
     context = {}
@@ -370,47 +426,50 @@ def Users_homeafter(request):
     product = Product_Details.objects.all()
     context['product'] = product
 
-     # Retrieve all categories
     categories = Product_Category.objects.all()
-    context['categories'] = categories  # Add 'categories' to the context
+    context['categories'] = categories
+
+    msg=Message.objects.all()
+    context['mesg']=msg
 
     if 'username' in request.session:
         username = request.session.get('username')
+        print(username,'/////////////////////////////')
 
         if username:
-            # Get the user object associated with the username
-            user = Custom_users.objects.get(username=username)
+            try:
+                user = Custom_users.objects.get(username=username)  # Try to get the user
 
-            cart_items = CartItem.objects.filter(user=user)
+                cart_items = CartItem.objects.filter(user=user)
 
-            subtotal_dict = {}
-            total = Decimal(0)
-            cart_count = 0  # Initialize cart count
+                subtotal_dict = {}
+                total = Decimal(0)
+                cart_count = 0
 
-            for item in cart_items:
-                # Calculate the total price for each cart item
-                item_total = item.quantity * item.product.product_price
-                if item.product.product_category.category_name in subtotal_dict:
-                    # If it exists, add the item total to the existing subtotal
-                    subtotal_dict[item.product.product_category.category_name] += item_total
-                else:
-                    # If it doesn't exist, create a new entry
-                    subtotal_dict[item.product.product_category.category_name] = item_total
+                for item in cart_items:
+                    item_total = item.quantity * item.product.product_price
+                    if item.product.product_category.category_name in subtotal_dict:
+                        subtotal_dict[item.product.product_category.category_name] += item_total
+                    else:
+                        subtotal_dict[item.product.product_category.category_name] = item_total
 
-                # Add item total to the total
-                total += item_total
-                cart_count += item.quantity
-                
+                    total += item_total
+                    cart_count += item.quantity
 
-            # Add 'cart_total' to the context
-            context['cart_total'] = total
-            context['cart_count'] = cart_count
-            context['username'] = username
+                context['cart_total'] = total
+                context['cart_count'] = cart_count
+                context['username'] = username
 
+                return render(request, "home_after.html", context)
 
-            return render(request, "home_after.html", context)  # Pass the context with 'cart_total'
-    
-    return redirect(Users_login)
+            except ObjectDoesNotExist:
+                # Handle the case where the user or cart items do not exist
+                return render(request, "User_login.html")
+        else:
+            # Handle the case where 'username' is in the session but not found
+            return render(request, "User_login.html")
+    else:
+        return redirect(Users_login)
 
 
 
@@ -487,11 +546,18 @@ def Admin_profile(request):
 
 #>>>>>>>>>>>>>>>>>>>>>>>>> user details  in admin side >>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+# def Users_details(request):
+#     user={
+#         'users':Custom_users.objects.all()
+#     }
+#     return render(request,'Users_details.html',user).
 def Users_details(request):
-    user={
-        'users':Custom_users.objects.all()
+    users = Custom_users.objects.all().order_by('-id')  # Order by 'id' in descending order
+    context = {
+        'users': users
     }
-    return render(request,'Users_details.html',user)
+    return render(request, 'Users_details.html', context)
+
 
 
 
@@ -587,32 +653,72 @@ def coupon_search(request):
 
 
 def home_search(request):
-
     if 'q' in request.GET:
         q = request.GET['q']
         multiple_s = Q(
-            Q(product_name__icontains=q) |
+            Q(product_name__startswith=q) |  # Fixed here
             
-            Q(product_price__icontains=q) 
-
+            Q(product_price__startswith=q)
         )
-    products=Product_Details.objects.filter(multiple_s).distinct()
-   
-    context={
-        'product':products,
-        
-    }
+        products = Product_Details.objects.filter(multiple_s).distinct()
 
+        context = {
+            'product': products,
+        }
+        if not products:
+            context['no_items_message'] = 'No items found for your search.'
 
-    return render(request,'home_after.html',context)
+        return render(request, 'home_after.html', context)
+
 
 
 def messagess(request):
     messages=Message.objects.all()
    
-   
-
     return render(request,'home_after.html', {'messages': messages})
+
+# def feedback_submission(request):
+#     username=request.session.get('username')
+
+#     if request.method =='POST':
+#         name=request.POST.get('name')
+#         feedback=request.POST.get('feedback')
+
+#         if name !=username:
+#             messages.error(request,'submit the feedback with your username')
+#             return redirect(feedback_submission)
+#         elif name == '' or feedback == '':
+#             messages.error(request,'fill the fields')
+#             return redirect(feedback_submission)
+#         else:
+#             feedback=Message(message=feedback)
+#             feedback.save()
+#             return redirect(Users_homeafter)
+from django.shortcuts import get_object_or_404
+
+def feedback_submission(request):
+    username = request.session.get('username')
+    user_instance = get_object_or_404(Custom_users, username=username)  # Retrieve the user instance
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        feedback = request.POST.get('feedback')
+
+        if name != username:
+            messages.error(request, 'Submit the feedback with your username')
+            return redirect(feedback_submission)
+        elif name == '' or feedback == '':
+            messages.error(request, 'Fill in all the fields')
+            return redirect(feedback_submission)
+        else:
+            feedback = Message(user=user_instance, message=feedback)
+            feedback.save()
+            messages.success(request,'feedback submitted successfully')
+            return redirect(Users_homeafter)
+
+    return redirect(Users_homeafter)
+
+   
 
 #??????????????????????????????????????  products details based codes in admin side ??????????????????????????????????
 
@@ -646,28 +752,50 @@ def Product_Details_all(request):
 
     return render(request,'Product_details.html',products)
 
-
 def Product_add(request):
     categories = Product_Category.objects.all()
 
-    if request.method=='POST':
+    if request.method == 'POST':
         try:
-            productname=request.POST['productname']
-            category_id=request.POST['category']
-            stock=request.POST['stock']
-            price=request.POST['price']
-            image=request.FILES['image']
+            productname = request.POST['productname']
+            category_id = request.POST['category']
+            stock = request.POST['stock']
+            price = request.POST['price']
+            image = request.FILES['image']
             quantity = request.POST.get('quantity', 0)  # Default to 0 if not provided
+
+
+             # Check if a product with the same name exists
+            existing_product = None
+
+            try:
+                existing_product = Product_Details.objects.get(product_name=productname)
+            except ObjectDoesNotExist:
+                pass
+
+
+            # Check if a product with the same name exists
+            if existing_product:
+               
+                messages.error(request, 'A product with the same name already exists')
+                
+                # Update the existing product with the new data
+                existing_product.product_category_id = category_id
+                existing_product.product_stock = stock
+                existing_product.product_price = price
+                existing_product.product_image = image
+                existing_product.product_quantity = quantity
+                existing_product.save()
+                
+                return redirect(Product_Details_all)
+            
 
             # Check if the specified category exists
             try:
                 category = Product_Category.objects.get(pk=category_id)
-
             except Product_Category.DoesNotExist:
-                    # Handle the case where the category doesn't exist (you can create it if needed)
                 messages.error(request, 'Category not found')
                 return redirect(Product_Details_all)
-            
 
             # Create a Product_Details instance with the correct field names
             product = Product_Details(
@@ -680,15 +808,13 @@ def Product_add(request):
             )
             product.save()
 
-            
             return redirect(Product_Details_all)
         except Exception as e:
             # Handle other exceptions, including any unexpected errors
-            messages.error(request, f'Error adding product: {str(e)}')
+            messages.error(request, f'Error adding/updating product: {str(e)}')
             return redirect(Product_Details_all)
-    
-    
-    return render(request,'Product_Add.html',{'categories': categories})
+
+    return render(request, 'Product_Add.html', {'categories': categories})
 
 
 
@@ -721,6 +847,7 @@ def do_update(request, product_id):
 
         product.product_stock = request.POST.get('stock')
         product.product_price = request.POST.get('price')
+        
     
         if 'image' in request.FILES:
             product.product_image = request.FILES.get('image')
@@ -939,6 +1066,22 @@ def update_quantity(request, item_id):
                 return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+# def check_stock_status(request, item_id):
+#     try:
+#         product = Product_Details.objects.get(product_id=item_id)
+
+#         # Check if the requested quantity exceeds available stock
+#         is_out_of_stock = product.product_stock <= 0
+#         stock_quantity = product.product_stock
+
+#         response_data = {
+#             'is_out_of_stock': is_out_of_stock,
+#             'stock_quantity': stock_quantity,
+#         }
+#         return JsonResponse(response_data)
+#     except Product_Details.DoesNotExist:
+#         return JsonResponse({'error': 'Product not found'}, status=404)
 
 def view_cart(request):
     username = request.session.get('username')
@@ -1172,12 +1315,14 @@ def Product_checkout(request):
     applied_coupon = None
     Ct_discount_amount = 0
     pddiscount_amount = 0
+    cart_total = 0 
 
     if username:
         user = Custom_users.objects.get(username=username)
         cart_items = CartItem.objects.filter(user=user)
         subtotal_dict = {}
         total, cart_count = calculate_cart_total(user)  # Implement calculate_cart_total
+        
 
         # Initialize the total_float as the initial total
         total_float = Decimal(str(total))
@@ -1201,11 +1346,20 @@ def Product_checkout(request):
             except Coupon.DoesNotExist:
                 messages.error(request, 'Invalid coupon code')
 
+        
+        displayed_categories = set()
+
         for item in cart_items:
             category = item.product.product_category
 
             try:
                 category_offer = Category_Offer.objects.get(category=category, expiration_date__gte=timezone.now().date(), is_active=True)
+                if category_offer:
+                    if item.product.product_category.category_name not in displayed_categories:
+                        displayed_categories.add(item.product.product_category.category_name)
+                        item.display_category_offer = True
+                    else:
+                        item.display_category_offer = False
 
                 if category_offer.offer_type == 'percentage':
                     Ct_discount_amount += (category_offer.discount_value / 100) * item.product.product_price * item.quantity
@@ -1216,6 +1370,8 @@ def Product_checkout(request):
 
             except Category_Offer.DoesNotExist:
                 pass
+
+            
 
             product = item.product
             try:
@@ -1241,11 +1397,13 @@ def Product_checkout(request):
         total_float -= Decimal(str(pddiscount_amount))
         request.session['total_float'] = float(total_float)
         coupon = Coupon.objects.all()
+        cart_total = float(total_float)  # Set the cart_total value
+       
 
     return render(request, 'product_checkout.html', {
         'cart_items': cart_items,
         'subtotal_dict': subtotal_dict,
-        'cart_total': total_float,
+        'cart_total': cart_total,
         'cart_count': cart_count,
         'total': total,
         'discount_amount': float(discount_amount),
@@ -1253,7 +1411,8 @@ def Product_checkout(request):
         'Ct_discount_amount': Ct_discount_amount,
         'pddiscount_amount': pddiscount_amount,
         'available_coupons': coupon,
-        'username':username
+        'username':username,
+        'displayed_categories':displayed_categories
     })
 
 
@@ -1292,28 +1451,71 @@ def Admin_couponsdisplay(request):
 
     return render(request,'Admin_coupons.html',coupon)
 
+# def Add_coupons(request):
+#       if request.method == 'POST':
+#         code = request.POST.get('code')
+#         discount_type = request.POST.get('discount_type')
+#         discount_value = request.POST.get('discount_value')
+#         expiration_date = request.POST.get('expiration_date')
+
+#         if code == "" or discount_type == "" or discount_value == "" or expiration_date == "":
+#             messages.error(request,"Empty form can't be submit")
+
+#         # Perform necessary validation on input data before saving
+#         else:
+#             Coupon.objects.create(
+#                 code=code,
+#                 discount_type=discount_type,
+#                 discount_value=discount_value,
+#                 expiration_date=expiration_date
+#             )
+
+#             return redirect('Admin_couponsdisplay') 
+        
+#       return render(request,'Admin_couponsAdd.html')
+
+
 def Add_coupons(request):
-      if request.method == 'POST':
+    if request.method == 'POST':
         code = request.POST.get('code')
         discount_type = request.POST.get('discount_type')
         discount_value = request.POST.get('discount_value')
         expiration_date = request.POST.get('expiration_date')
 
         if code == "" or discount_type == "" or discount_value == "" or expiration_date == "":
-            messages.error(request,"Empty form can't be submit")
-
-        # Perform necessary validation on input data before saving
+            messages.error(request, "Empty form can't be submitted")
         else:
-            Coupon.objects.create(
-                code=code,
-                discount_type=discount_type,
-                discount_value=discount_value,
-                expiration_date=expiration_date
-            )
+            discount_value = int(discount_value)
 
-            return redirect('Admin_couponsdisplay') 
-        
-      return render(request,'Admin_couponsAdd.html')
+            if discount_type == 'percentage':
+                # Check if the percentage discount is less than 30%
+                if discount_value > 30 or discount_value < 0:
+                    messages.error(request, "Percentage discount must be greaterthan 0 and lessthan 30%")
+                else:
+                    Coupon.objects.create(
+                        code=code,
+                        discount_type=discount_type,
+                        discount_value=discount_value,
+                        expiration_date=expiration_date
+                    )
+                    return redirect('Admin_couponsdisplay')
+            elif discount_type == 'fixed':
+                # Check if the fixed discount is less than 150
+                if discount_value > 150 or discount_value < 0:
+                    messages.error(request, "Fixed discount must be lessthan Rs.150 or greaterthan 0")
+                else:
+                    Coupon.objects.create(
+                        code=code,
+                        discount_type=discount_type,
+                        discount_value=discount_value,
+                        expiration_date=expiration_date
+                    )
+                    return redirect('Admin_couponsdisplay')
+            else:
+                messages.error(request, "Invalid discount type")
+
+    return render(request, 'Admin_couponsAdd.html')
+
 
 def delete_coupons(request,coupon_id):
      if request.method == 'POST':
@@ -1533,8 +1735,12 @@ def place_order_success(request):
 
 
 def Admin_orderstatus(request):
-    orders=Order.objects.all()
-    orderitems=OrderItem.objects.all()
+    orders=Order.objects.all().order_by('-order_date')
+    orderitems=OrderItem.objects.all().order_by('-order_date')
+
+
+
+   
     # Specify the number of items per page
     items_per_page = 10  # You can adjust this value as needed
     
@@ -1557,6 +1763,8 @@ def Admin_orderstatus(request):
     context = {
         'orders': orders,
         'order_items': orderitems,
+       
+        
     }
 
 
@@ -1607,6 +1815,7 @@ def view_useraccount_details(request):
         if user_data:
             # Fetch all associated addresses
             user_addresses = Users_Address.objects.filter(user=user_data)
+            
 
         context = {
             'username': user_data,
@@ -1647,7 +1856,7 @@ def delete_address(request, address_id):
 def order_details(request):
     username = request.session.get('username')  # Assuming the user is logged in
     user = get_object_or_404(Custom_users, username=username)
-    orders = Order.objects.filter(user=user)
+    orders = Order.objects.filter(user=user).order_by('-id')
 
     context = {
         'orders': orders,
@@ -1731,34 +1940,58 @@ def Admin_productoffer(request):
     return render(request,'Admin_productoffer.html',productoffers)
 
 def productoffer_add(request):
-
-    products={
-        'product':Product_Details.objects.all()
+    products = {
+        'product': Product_Details.objects.all()
     }
+    
     if request.method == 'POST':
-        product_id= request.POST.get('product')
+        product_id = request.POST.get('product')
         offer_type = request.POST.get('offer_type')
         discount_value = request.POST.get('discount_value')
         expiration_date = request.POST.get('expiration_date')
 
         if product_id == "" or offer_type == "" or discount_value == "" or expiration_date == "":
-            messages.error(request,"Empty form can't be submit")
-            return redirect(productoffer_add)
+            messages.error(request, "Empty form can't be submitted")
+            return redirect('productoffer_add')
 
         # Perform necessary validation on input data before saving
         else:
             product = Product_Details.objects.get(product_id=product_id)
-            Product_Offer.objects.create(
-                product=product,
-                offer_type=offer_type,
-                discount_value=discount_value,
-                expiration_date=expiration_date
-            )
 
+            # Convert the discount_value to an integer
+            discount_value = int(discount_value)
 
-        return redirect(Admin_productoffer)
+            if offer_type == 'percentage':
+                # Check if the percentage discount is less than 30%
+                if discount_value > 30 or discount_value < 0:
+                    messages.error(request, "Percentage discount must be lessthan 30% or greaterthan 0")
+                    return redirect(productoffer_add)
+                else:
+                    Product_Offer.objects.create(
+                        product=product,
+                        offer_type=offer_type,
+                        discount_value=discount_value,
+                        expiration_date=expiration_date
+                    )
+            elif offer_type == 'fixed':
+                # Check if the fixed discount is less than 150
+                if discount_value > 150 or discount_value < 0 :
+                    messages.error(request, "Fixed discount must be lessthan RS.150 or greaterthan 0")
+                    return redirect(productoffer_add)
+                else:
+                    Product_Offer.objects.create(
+                        product=product,
+                        offer_type=offer_type,
+                        discount_value=discount_value,
+                        expiration_date=expiration_date
+                    )
+            else:
+                messages.error(request, "Invalid offer type")
 
-    return render(request,'Adminproductoffer_add.html',products)
+        return redirect('Admin_productoffer')
+
+    return render(request, 'Adminproductoffer_add.html', products)
+
 
 def productoffer_delete(request,productoffer_id):
     productoffer=get_object_or_404(Product_Offer,id=productoffer_id)
@@ -1789,34 +2022,58 @@ def Admin_categoryoffer(request):
     return render(request,'Admin_categoryoffer.html',categoryoffers)
 
 def Categoryoffer_add(request):
-    productcategory={
-        'product_categories':Product_Category.objects.all()
+    productcategory = {
+        'product_categories': Product_Category.objects.all()
     }
 
     if request.method == 'POST':
-        category_id= request.POST.get('category')
+        category_id = request.POST.get('category')
         offer_type = request.POST.get('offer_type')
         discount_value = request.POST.get('discount_value')
         expiration_date = request.POST.get('expiration_date')
 
         if category_id == "" or offer_type == "" or discount_value == "" or expiration_date == "":
-            messages.error(request,"Empty form can't be submit")
-            return redirect(Categoryoffer_add)
+            messages.error(request, "Empty form can't be submitted")
+            return redirect('Categoryoffer_add')
 
         # Perform necessary validation on input data before saving
         else:
             category = Product_Category.objects.get(category_id=category_id)
-            Category_Offer.objects.create(
-                category=category,
-                offer_type=offer_type,
-                discount_value=discount_value,
-                expiration_date=expiration_date
-            )
 
+            # Convert the discount_value to an integer
+            discount_value = int(discount_value)
 
+            if offer_type == 'percentage':
+                # Check if the percentage discount is less than 30%
+                if discount_value > 30 or discount_value < 0:
+                    messages.error(request, "Percentage discount must be less than 30% or greater than 0")
+                    return redirect('Categoryoffer_add')
+                else:
+                    Category_Offer.objects.create(
+                        category=category,
+                        offer_type=offer_type,
+                        discount_value=discount_value,
+                        expiration_date=expiration_date
+                    )
+            elif offer_type == 'fixed':
+                # Check if the fixed discount is less than 150
+                if discount_value > 150 or discount_value < 0:
+                    messages.error(request, "Fixed discount must be less than RS.150 or greater than 0")
+                    return redirect('Categoryoffer_add')
+                else:
+                    Category_Offer.objects.create(
+                        category=category,
+                        offer_type=offer_type,
+                        discount_value=discount_value,
+                        expiration_date=expiration_date
+                    )
+            else:
+                messages.error(request, "Invalid offer type")
 
-        return redirect(Admin_categoryoffer)
-    return render(request,'Categoryoffer_add.html',productcategory)
+        return redirect('Admin_categoryoffer')
+    
+    return render(request, 'Categoryoffer_add.html', productcategory)
+
 
 
 def categoryoffer_disable(request, category_offer_id):
@@ -1851,12 +2108,13 @@ def generate_pdf(request,order_id):
     # Retrieve the order or return a 404 response if it doesn't exist
     order = get_object_or_404(Order, id=order_id)
     print(order_id,'////////////////////////')
+    total= request.session.get('total_float')
 
     # Retrieve order items for the given order
     order_items = OrderItem.objects.filter(order=order)
 
     # Render the PDF content
-    pdf_content = render_to_pdf('invoice_template.html', {'order': order, 'order_items': order_items})
+    pdf_content = render_to_pdf('invoice_template.html', {'order': order, 'order_items': order_items,'total':total})
 
     if pdf_content:
         # Create an HttpResponse with the PDF content
@@ -1886,7 +2144,6 @@ def render_to_pdf(template_path, context):
   
 #>>>>>>>>>>>>>>>>>. admin sales report >>>>>>>>>>>>>>>>>>>>>>>>
 
-
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -1897,25 +2154,75 @@ import datetime
 import pytz
 from django.utils import timezone
 
+import matplotlib.pyplot as plt
+from io import BytesIO
+from django.http import HttpResponse
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from datetime import datetime
+
+
+def generate_sales_chart(sales_data):
+    # Extract date and sales data for the chart
+    dates = [entry['order_date'].date() for entry in sales_data]
+    total_sales = [entry['total_sales'] for entry in sales_data]
+
+    # Create a figure and plot the data
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(dates, total_sales, marker='o', linestyle='-')
+
+    # Customize the chart appearance
+    ax.set(xlabel='Date', ylabel='Total Sales',
+           title='Sales Over Time')
+    ax.grid()
+    plt.xticks(rotation=45)  # Rotate x-axis labels for readability
+
+    # Create a buffer to save the chart image
+    buffer = BytesIO()
+    canvas = FigureCanvasAgg(fig)
+    canvas.print_png(buffer)
+
+    return buffer
+
+def download_sales_chart(request):
+    # Query sales data
+    sales_data = OrderItem.objects.values('order_date').annotate(total_sales=Sum('quantity'))
+
+    # Generate sales chart
+    chart_buffer = generate_sales_chart(sales_data)
+
+    # Create the HttpResponse object with the appropriate image headers
+    response = HttpResponse(chart_buffer.getvalue(), content_type='image/png')
+    response['Content-Disposition'] = 'attachment; filename="sales_chart.png"'
+
+    return response
+
+
+
+from django.db.models import Sum
+from django.utils import timezone
+from datetime import date, timedelta
 
 def sales_report(request):
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
+  
+    start_date = request.GET.get('start_date', (date.today() - timedelta(days=15)).isoformat())
+    end_date = request.GET.get('end_date', date.today().isoformat())
 
+    # Print for debugging purposes
     print("Start Date:", start_date)
     print("End Date:", end_date)
 
-    sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
+    # Get the sales data without filtering
+    sales_data = OrderItem.objects.values('product__product_name')
+
     if start_date and end_date:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
-        start_date = datetime.datetime.combine(start_date, datetime.time.min, tzinfo=pytz.UTC)
-        end_date = datetime.datetime.combine(end_date, datetime.time.max, tzinfo=pytz.UTC)
-        print("Applying Date Filter")
-        sales_data = sales_data.filter(order__order_date__range=[start_date, end_date])
-        print(sales_data)
+        # Convert start_date and end_date to datetime objects
+        start_datetime = timezone.make_aware(timezone.datetime.strptime(start_date, '%Y-%m-%d'))
+        end_datetime = timezone.make_aware(timezone.datetime.strptime(end_date, '%Y-%m-%d'))
+        
+        # Filter sales data based on the date range
+        sales_data = sales_data.filter(order__order_date__range=(start_datetime, end_datetime))
 
-
+    # Annotate the total sales
     sales_data = sales_data.annotate(total_sales=Sum('quantity'))
 
     return render(request, 'Adminsales_report.html', {'sales_data': sales_data})
@@ -1923,68 +2230,92 @@ def sales_report(request):
 
 
 
-
-
-def generate_pdfdata(sales_data):
+def generate_sales_report_pdf(sales_data):
     buffer = BytesIO()
 
     # Create the PDF object using BytesIO as its "file"
     p = canvas.Canvas(buffer, pagesize=letter)
 
+    # Set PDF title
+    p.setTitle("Sales Report")
+
     # Set styles
     p.setFont("Helvetica", 12)
 
-    # Use the sales_data to populate the PDF content
-    # For simplicity, we'll just add a basic table
-    table_data = [['Product Name', 'Total Sales Quantity']] + \
-                 [[entry['product__product_name'], entry['total_sales']] for entry in sales_data]
-
-     # Set table styles
- # Set table styles
-    col_widths = [p.stringWidth(str(cell_value), "Helvetica", 12) + 6 for cell_value in table_data[0]]
-    row_height = 20
-    width, height = letter
-    x = 40
-    y = height - 100
+    # Define the table headers
+    table_data = [['Product Name', 'Total Sales Quantity']]
 
     # Draw table headers
+    x, y = 40, 750
     for col_num, cell_value in enumerate(table_data[0]):
         p.drawString(x, y, cell_value)
-        x += col_widths[col_num]
-    
+        x += 200
+
     # Draw table rows
-    y -= row_height
-    for row in table_data[1:]:
+    y -= 20
+    for entry in sales_data:
+        row = [entry['product__product_name'], entry['total_sales']]
         x = 40
         for col_num, cell_value in enumerate(row):
             p.drawString(x, y, str(cell_value))
-            x += col_widths[col_num]
-        y -= row_height
+            x += 200
+        y -= 20
 
-    # Close the PDF object cleanly, and we're done.
+    # Close the PDF object cleanly
     p.showPage()
     p.save()
 
-    # FileResponse sets the Content-Disposition header so that browsers
-    # present the option to save the file.
+    # Reset the buffer for reading
     buffer.seek(0)
     return buffer
 
 def download_sales_report(request):
-    # Query sales data
-    sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
-    # Generate PDF content
-    pdf_buffer = generate_pdfdata(sales_data)
+    # Print for debugging purposes
+    print("Start Date:", start_date)
+    print("End Date:", end_date)
 
-    # Create the HttpResponse object with the appropriate PDF headers.
-    response = HttpResponse(content_type='application/pdf')
+    # Get the sales data without filtering
+    # sales_data = OrderItem.objects.values('product__product_name')
+
+    if start_date and end_date:
+        start_datetime = timezone.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_datetime = timezone.datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        # Filter sales data based on the date range
+        # sales_data = sales_data.filter(order__order_date__range=(start_datetime, end_datetime))
+        sales_data = OrderItem.objects.values('product__product_name').filter(
+            order__order_date__range=(start_datetime, end_datetime)
+        ).annotate(total_sales=Sum('quantity'))
+
+    # # Annotate the total sales
+    # sales_data = sales_data.annotate(total_sales=Sum('quantity'))
+    else:
+        # If no date range is specified, retrieve all sales data
+        sales_data = OrderItem.objects.values('product__product_name').annotate(total_sales=Sum('quantity'))
+
+
+    # Generate the PDF content
+    pdf_buffer = generate_sales_report_pdf(sales_data)
+
+    # Create the HttpResponse object with the appropriate PDF headers
+    response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
 
-    # Write the PDF content to the response
-    response.write(pdf_buffer.getvalue())
-
     return response
+
+
+
+
+
+
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> paginator giving in products >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -2029,3 +2360,103 @@ def shopitems(request):
 
     return render(request, 'products.html', context)
 
+
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>> dashboard setting on the basis of sales >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
+
+
+from django.utils import timezone
+from django.db.models import Sum
+from django.shortcuts import render
+from datetime import datetime
+from .models import Order, OrderItem, Product_Details
+
+def dashboard(request):
+    
+    if request.method == "POST":
+        start_date= request.POST.get("startdate")
+        end_date = request.POST.get("enddate")
+        
+        
+
+        # Convert start_date_str and end_date_str to datetime objects
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d")
+  
+    else:
+        # Calculate the default date range as the past 15 days from the current date
+        end_date = timezone.now()  # Current date and time
+        if not timezone.is_aware(end_date):
+            end_date = timezone.make_aware(end_date)
+        
+        start_date = end_date - timedelta(days=7)  # Calculate the start date as 15 days ago
+        if not timezone.is_aware(start_date):
+            start_date = timezone.make_aware(start_date)
+        print(start_date)
+        print(end_date)
+
+    # Filter orders and items for the specified date range
+    orders = Order.objects.filter(order_date__range=(start_date, end_date))
+    items = OrderItem.objects.filter(orders__in=orders, product__isnull=False)
+
+    # Create a dictionary to store sales data
+    sales_data = {}
+
+    for item in items:
+        product_name = item.product.product_name
+
+        if product_name in sales_data:
+            sales_data[product_name] += item.quantity
+        else:
+            sales_data[product_name] = item.quantity
+
+    # Sort the sales_data dictionary by product name to make it easier to display in the template
+    sorted_sales_data = dict(sorted(sales_data.items()))
+
+    # Calculate the total sales
+    total_sales = sum(sorted_sales_data.values())
+
+    # Get the top-selling product
+    top_product = max(sorted_sales_data, key=sorted_sales_data.get, default=None)
+
+    context = {
+        "sales_data": sorted_sales_data,
+        "total_sales": total_sales,
+        "top_product": top_product,
+        "start_date": start_date.date(),
+        "end_date": end_date.date(),
+    }
+
+    return render(request, "dashboard.html", context)
+
+
+
+def contact_us(request):
+    username=request.session.get('username')
+    if request.method == 'POST':
+        name=request.POST.get('name')
+        email=request.POST.get('email')
+        text=request.POST.get('text')
+
+        if name != username:
+            messages.error(request, 'You can only post messages with your username.')
+
+        elif name == "" or email == "" or text == "":
+            messages.error(request,'empty form canot be submit')
+            return redirect(contact)
+        else:
+            msg=Contact_with_us(name=name,email=email,text=text)
+            msg.save()
+            messages.success(request,'your message successfully send')
+
+
+    return render(request,'contact.html')
+
+def admin_usersmsg(request):
+    msg=Contact_with_us.objects.all()
+    context={
+        'msgs':msg
+    }
+
+    return render(request,'Users_messages.html',context)

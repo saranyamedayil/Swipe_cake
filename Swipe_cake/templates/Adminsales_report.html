@@ -1,9 +1,7 @@
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Sales Report</title>
+{% extends 'adminbase.html' %} 
+{% load static %}
+{% block title %}Admin|home {% endblock %}
+{% block content %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +25,7 @@
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color:;
         }
         #download-link {
             display: inline-block;
@@ -51,16 +49,24 @@
         
         
     </style>
-</head>
-<body>
-    <h1>Sales Report</h1>
+    <div class="main-panel">
+        <div class="content-wrapper">
+          
+          <div class="row">
+            <div class="col-xl-12 col-sm-12 grid-margin stretch-card">
+            
+              
+                    <div class="col-12">
+
+    <h1>Sales Report </h1>
     <form method="get" action="{% url 'sales_report' %}">
         <label for="start_date">Start Date:</label>
         <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
         <label for="end_date">End Date:</label>
         <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
         {% comment %} <input type="submit" value="Filter" class='btn btn-success'> {% endcomment %}
-        <button type="submit" value="Filter" class="filter-button">filter</button>
+        <button type="submit" value="Filter" class="filter-button">filter</button><br>
+        <a href="{% url 'download_sales_report' %}?start_date={{ request.GET.start_date|default:'' }}&end_date={{ request.GET.end_date|default:'' }}">Download Sales Report</a>
     </form>
     
     <table>
@@ -77,8 +83,16 @@
                     <td>{{ entry.total_sales }}</td>
                 </tr>
             {% endfor %}
-            <a href="{% url 'download_sales_report' %}" class="download-link">Download Sales Report</a>
+           
+
+            {% comment %} <a href="{% url 'download_sales_report' %}" class="download-link">Download Sales Report</a>
+            <a href="{% url 'download_sales_report' %}?start_date=2023-10-26&end_date=2023-10-28">Download Sales Report</a> {% endcomment %}
+
         </tbody>
     </table>
-</body>
-</html>
+</div>
+    </div>
+            </div>
+        </div>
+    </div>
+    {% endblock content %}

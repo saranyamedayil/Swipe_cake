@@ -68,6 +68,12 @@
                     <th>Payment Method</th>
                     <td>{{ order.get_payment_method_display }}</td>
                 </tr>
+                {% comment %} <tr>
+                    <th>
+                        Final price
+                    </th>
+                    <td>{{total}}</td>
+                </tr> {% endcomment %}
             </table>
         </div>
 
@@ -79,6 +85,7 @@
                         <th>Quantity</th>
                         <th>Price</th>
                         <th>Total Price</th>
+                       
                      
                     </tr>
                 </thead>
@@ -89,9 +96,7 @@
                             <td>{{ item.quantity }}</td>
                             <td>{{ item.product.product_price }}</td>
                             <td>{{ item.price }}</td>
-                            
-                           
-                            
+                               
                         </tr>
                     {% endfor %}
                 </tbody>

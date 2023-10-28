@@ -140,26 +140,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 
-<script>
-    {% for msg in messages %}
-    // Add a click event listener to the document
-    document.addEventListener('click', function (event) {
-        const clickedElement = event.target;
 
-        // Check if the clicked element is not the login or signup button
-        if (!clickedElement.classList.contains('no-message')) {
-            // Display a SweetAlert message when the document is clicked
-            Swal.fire({
-                icon: 'info',
-                title: 'Warning',
-                text: '{{ msg }}',
-                showConfirmButton: false,
-                timer: 2000, // Set the timer (in milliseconds) to automatically close the alert
-            });
-        }
-    });
-    {% endfor %}
-</script>
 
 
 {% block scripts %}
