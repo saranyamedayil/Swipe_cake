@@ -280,24 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Add a click event listener to the "Place Order" button
-    placeOrderButton.addEventListener('click', function () {
-        // Check if a saved address is selected
-        const selectedAddressCheckbox = document.querySelector('input[name="saved-address"]:checked');
-
-        if (selectedAddressCheckbox) {
-            const selectedAddressId = selectedAddressCheckbox.value;
-            
-
-            // Fetch the details of the selected address
-            const selectedAddressDetails = getAddressDetailsById(selectedAddressId);
-
-            // Now you can use the selectedAddressDetails to place the order
-            placeOrder(selectedAddressDetails);
-        } else {
-            alert('Please select a saved address before placing the order.');
-        }
-    });
+    
 
     // Function to display saved address details
     function displaySavedAddresses(addresses) {
@@ -339,8 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to retrieve address details by ID
     function getAddressDetailsById(addressId) {
-        // Replace this with your logic to fetch details from the server
-        // You may already have this data if you fetched it earlier
+        
         // For demonstration purposes, I assume you have an array named 'data.savedAddresses'
         const addresses = data.savedAddresses;
         const selectedAddress = addresses.find(address => address.id === addressId);
@@ -355,7 +337,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedPaymentRadio = document.querySelector('input[name="payment-method"]:checked');
       
         if (!selectedAddressCheckbox) {
-            alert('Please select a saved address before placing the order.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please select a saved address before placing the order.',
+                
+            });
+           
         }else {
             const selectedAddressId = selectedAddressCheckbox.value;
             const selectedAddressDetails = getAddressDetailsById(selectedAddressId);
@@ -412,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function () {
         icon: 'warning'
     });
 {% endif %}
-{% endfor %}
+{% endfor %} 
 
 
 </script>

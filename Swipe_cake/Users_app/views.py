@@ -18,6 +18,8 @@ from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import csrf_protect
+# from django.shortcuts import render_to_response
+# from django.template import RequestContext
 
 
 
@@ -32,6 +34,15 @@ import uuid
 def custom_404_page(request, exception):
     
     return render(request,'404.html', status=404)
+
+
+
+
+
+# def handler404(request, exception, template_name="404.html"):
+#     response = render_to_response(template_name)
+#     response.status_code = 404
+#     return response
 
 
 
@@ -1640,10 +1651,12 @@ def place_order(request):
         username = request.session.get('username')
         order_notes = request.POST.get('order_notes', '')
         total_float = request.session.get('total_float')
+        print('code enters *****')
 
         try:
             user = Custom_users.objects.get(username=username)
             address = Users_Address.objects.get(id=selected_address_details)
+            print('checks try **********')
 
             with transaction.atomic():
                 # Create a new order instance
@@ -1655,7 +1668,8 @@ def place_order(request):
                     payment_method=selected_payment_method,
                     order_notes=order_notes 
                 )
-
+               
+                
                 if selected_payment_method is None:
                     messages.warning(request, 'Please select a payment method.')
                     return redirect('Product_checkout')
@@ -1703,11 +1717,14 @@ def place_order(request):
                 CartItem.objects.filter(user=user).delete()
 
                 return render(request, 'place_order.html', {'order': new_order})
+        
 
         except Custom_users.DoesNotExist:
+            print('try exit')
             pass
         except Users_Address.DoesNotExist:
-            pass
+            print('sec try exit')
+            return redirect('Product_checkout')
 
     return redirect('Product_checkout')
 
