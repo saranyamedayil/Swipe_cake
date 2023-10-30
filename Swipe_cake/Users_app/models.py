@@ -14,6 +14,7 @@ class Custom_users(models.Model):
     is_staff = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
     otp=models.CharField(max_length=6,null=True)
+    otp_verified = models.BooleanField(default=False) 
     is_blocked = models.BooleanField(default=False)
     
 

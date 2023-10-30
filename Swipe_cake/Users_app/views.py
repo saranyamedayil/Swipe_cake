@@ -310,7 +310,7 @@ def sent_otp(request):
 
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>.  otp verification method >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+@never_cache
 def verify_otp(request):
     phonenumber = request.session.get('phonenumber')
     otp = request.session.get('otp')
@@ -326,9 +326,15 @@ def verify_otp(request):
         try:
             user_obj = Custom_users.objects.get(phonenumber=phonenumber)
 
+            if user_obj.otp_verified:
+                # User has already been verified, redirect to login
+                request.session['username'] = user_obj.username
+                return redirect('login')
+
             if otp == phone_otp:
                 # OTP is valid, perform further actions like setting a session and redirecting
                 user_obj.otp=phone_otp
+                user_obj.otp_verified = True
                 user_obj.save()
                 request.session['username'] = user_obj.username
                 return redirect('login')  # Redirect to the login page upon successful OTP verification
